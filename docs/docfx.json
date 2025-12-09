@@ -5,7 +5,7 @@
         {
           "src": "../src",
           "files": [
-            "**/*.csproj"
+            "**/AlphaVantageAPI/bin/release/net10.0/**.dll"
           ],
           "exclude": [
             "**/*Tests.csproj"

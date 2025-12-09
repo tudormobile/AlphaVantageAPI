@@ -22,7 +22,7 @@ jobs:
         NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         
     - name: Unit tests
-      run: dotnet test --coverage --logger "trx;LogFilePrefix=output"
+      run: dotnet test --coverage --report-trx --report-trx-filename "output.trx"
 
     - name: Build
       run: |
@@ -41,7 +41,8 @@ jobs:
 
     - name: Documentation
       run: |
-        dotnet tool update -g docfx
+        dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github-packages "https://nuget.pkg.github.com/dotnet/index.json"
+        dotnet tool update -g docfx --add-source github-packages --prerelease
         docfx docs/docfx.json
 
     - name: Upload Package
