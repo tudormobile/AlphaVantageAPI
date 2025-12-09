@@ -1,0 +1,36 @@
+<Project>
+
+  <!-- General Properties -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- Version -->
+  <PropertyGroup>
+    <build>$([System.DateTime]::Now.ToString('yyMM'))</build>
+    <rev>$([System.DateTime]::Now.ToString('100dd'))</rev>
+    <ver>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)\..\..\version.txt').Trim())</ver>
+  </PropertyGroup>
+
+  <!-- Package Properties -->
+  <PropertyGroup>
+    <AssemblyVersion>$(ver).$(build).$(rev)</AssemblyVersion>
+    <Version>$(ver).$(build)</Version>
+    <Company>Tudormobile</Company>
+    <Authors>WH Tudor</Authors>
+    <Copyright>Copyright © 2025 Bill Tudor</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/tudormobile/AlphaVantageAPI</RepositoryUrl>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+</Project>

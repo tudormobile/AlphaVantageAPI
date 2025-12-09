@@ -1,0 +1,79 @@
+name: Build and Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+permissions: write-all
+jobs:
+  build:
+    name: Build and Test Library
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+      env:
+        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        
+    - name: Unit tests
+      run: dotnet test --coverage --logger "trx;LogFilePrefix=output"
+
+    - name: Build
+      run: |
+        dotnet build -c Release
+
+    - name: Unit Test Annotations
+      run: |
+        dotnet tool update -g dotnet-Coverage
+        dotnet tool update -g dotnet-reportgenerator-globaltool
+        dotnet-coverage merge **\*.coverage --remove-input-files --output-format xml --output output.xml
+        reportgenerator -reports:"output.xml" -targetdir:"output" -reporttypes:"MarkdownSummaryGithub"
+        echo "### Test Results" >> "$env:GITHUB_STEP_SUMMARY"
+        Get-ChildItem -Recurse -Filter *.trx | ForEach-Object {get-content $_.FullName | select-string 'executed=\"(\d+)\" passed=\"(\d+)\" failed=\"(\d+)\"' | ForEach-Object {":purple_circle: Tests: " + $_.Matches[0].Groups[1].Value + " :green_circle: Passed: " + $_.Matches[0].Groups[2].Value + " :red_circle: Failed: " + $_.Matches[0].Groups[3].Value}} >> "$env:GITHUB_STEP_SUMMARY"
+        echo "### Code Coverage" >> "$env:GITHUB_STEP_SUMMARY"
+        get-content output\SummaryGithub.md | select-string '<summary>(.+%)</summary>' | ForEach-Object {$_.Matches[0].Groups[1].Value} >> "$env:GITHUB_STEP_SUMMARY"
+
+    - name: Documentation
+      run: |
+        dotnet tool update -g docfx
+        docfx docs/docfx.json
+
+    - name: Upload Package
+      uses: actions/upload-artifact@v4
+      with:
+        name: package
+        path: src/AlphaVantageAPI/bin/release/*.nupkg
+    - name: Create Zip for Release
+      run: compress-archive -Path src\AlphaVantageAPI\bin\release\*.nupkg -Destination package.zip -Force
+    - name: Get version
+      id: vars
+      run: |
+        $env:ver = Get-Content src\AlphaVantageAPI\bin\release\ver.txt
+        echo version=$env:ver >> $env:GITHUB_OUTPUT
+    - name: Test output
+      run: echo ${{ steps.vars.outputs.version }}      
+
+    - name: Create release
+      if: ${{ github.event_name == 'push' }}
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "Creating release"
+        echo gh release create --generate-notes v${{ steps.vars.outputs.version }} package.zip
+        gh release create -t ${{ steps.vars.outputs.version }} --generate-notes v${{ steps.vars.outputs.version }} package.zip#package
+
+    - name: Publish package
+      if: ${{ github.event_name == 'push' }}
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "Adding local repo as nuget source"
+        dotnet nuget add source --username tudormobile --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/tudormobile/index.json"
+        echo "Pushing package"
+        dotnet nuget push "src\AlphaVantageAPI\bin\release\*.nupkg" --source "github" --skip-duplicate

@@ -1,0 +1,54 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "../src",
+          "files": [
+            "**/*.csproj"
+          ],
+          "exclude": [
+            "**/*Tests.csproj"
+          ]
+        }
+      ],
+      "dest": "api",
+      "filter": "filterConfig.yml"
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "**/*.{md,yml}"
+        ],
+        "exclude": [
+          "_site/**"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "images/**"
+        ]
+      }
+    ],
+    "output": "_site",
+    "template": [
+      "default",
+      "modern",
+      "template"
+    ],
+    "globalMetadata": {
+      "_appFaviconPath": "images/logo.svg",
+      "_appLogoPath": "images/logo.svg",
+      "_appName": "AlphaVantageAPI",
+      "_appTitle": "Tudormobile.AlphaVantageAPI",
+      "_appFooter": "<span>Copyright (C) Bill Tudor</span>",
+      "_enableSearch": false,
+      "pdf": false,
+      "_disableContribution": true
+    }
+  }
+}

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/AlphaVantageAPI.Tests/AlphaVantageAPI.Tests.csproj" Id="ee263615-1833-448a-aef0-e91121fe972d" />
+  <Project Path="src/AlphaVantageAPI/AlphaVantageAPI.csproj" Id="eb5792df-699e-4374-bf8f-5f7e10127eac" />
+</Solution>

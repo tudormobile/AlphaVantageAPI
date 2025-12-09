@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AssemblyName>Tudormobile.$(MSBuildProjectName)</AssemblyName>
+        <RootNamespace>Tudormobile.$(MSBuildProjectName.Replace("API", ""))</RootNamespace>
+        <Product>Tudormobile AphaVantage API</Product>
+        <Description>Tudormobile AphaVantage API Library</Description>
+        <PackageTags>AlphaVantage;Tudormobile</PackageTags>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\docs\README.md" Pack="true" PackagePath="\" />
+        <InternalsVisibleTo Include="$(MSBuildProjectName).Tests" />
+    </ItemGroup>
+
+</Project>
