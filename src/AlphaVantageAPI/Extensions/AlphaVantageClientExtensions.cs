@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Tudormobile.AlphaVantage.entities;
+using Tudormobile.AlphaVantage.Entities;
 
 namespace Tudormobile.AlphaVantage.Extensions;
 
@@ -11,14 +11,17 @@ namespace Tudormobile.AlphaVantage.Extensions;
 /// client setup and integration scenarios.</remarks>
 public static class AlphaVantageClientExtensions
 {
-    /// <summary>
-    /// Creates a new builder for configuring and constructing an instance of an Alpha Vantage client.
-    /// </summary>
-    /// <returns>An <see cref="IAlphaVantageClientBuilder"/> that can be used to configure and build an <see
-    /// cref="IAlphaVantageClient"/> instance.</returns>
-    public static IAlphaVantageClientBuilder GetBuilder()
+    extension(IAlphaVantageClient client)
     {
-        return new AlphaVantageClientBuilder();
+        /// <summary>
+        /// Creates a new builder for configuring and constructing an instance of an Alpha Vantage client.
+        /// </summary>
+        /// <returns>An <see cref="IBuilder{IAlphaVantageClient}"/> that can be used to configure and build an <see
+        /// cref="IAlphaVantageClient"/> instance.</returns>
+        public static IAlphaVantageClientBuilder GetBuilder()
+        {
+            return new AlphaVantageClientBuilder();
+        }
     }
 
     /// <summary>
