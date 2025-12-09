@@ -35,12 +35,15 @@ jobs:
     - run: |
         dotnet tool update -g dotnet-Coverage
         dotnet tool update -g dotnet-reportgenerator-globaltool
-        dotnet tool update -g docfx
     - run: |
         dotnet test --logger "trx;LogFilePrefix=output" --collect "Code Coverage" 
         dotnet build -c Release
         dotnet-coverage merge **\*.coverage --remove-input-files --output-format xml --output output.xml
         reportgenerator -reports:"output.xml" -targetdir:"output" -reporttypes:"MarkdownSummaryGithub"
+    - name: Documentation
+      run: |
+        dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github-packages "https://nuget.pkg.github.com/dotnet/index.json"
+        dotnet tool update -g docfx --add-source github-packages --prerelease
         docfx docs/docfx.json
 
     - name: Upload artifact
