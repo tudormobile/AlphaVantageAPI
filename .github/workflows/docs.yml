@@ -30,13 +30,15 @@ jobs:
     - name: Dotnet Setup
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 9.x
+        dotnet-version: 10.0.x
+      env:
+        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
     - run: |
         dotnet tool update -g dotnet-Coverage
         dotnet tool update -g dotnet-reportgenerator-globaltool
     - run: |
-        dotnet test --logger "trx;LogFilePrefix=output" --collect "Code Coverage" 
+        dotnet test --coverage --report-trx --report-trx-filename "output.trx"
         dotnet build -c Release
         dotnet-coverage merge **\*.coverage --remove-input-files --output-format xml --output output.xml
         reportgenerator -reports:"output.xml" -targetdir:"output" -reporttypes:"MarkdownSummaryGithub"
