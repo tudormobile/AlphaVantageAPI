@@ -11,18 +11,14 @@ namespace Tudormobile.AlphaVantage.Extensions;
 /// client setup and integration scenarios.</remarks>
 public static class AlphaVantageClientExtensions
 {
-    extension(IAlphaVantageClient client)
+    /// <summary>
+    /// Creates a new builder for configuring and constructing an instance of an Alpha Vantage client.
+    /// </summary>
+    /// <returns>An <see cref="IAlphaVantageClientBuilder"/> that can be used to configure and build an <see
+    /// cref="IAlphaVantageClient"/> instance.</returns>
+    public static IAlphaVantageClientBuilder GetBuilder()
     {
-        /// <summary>
-        /// Creates a new builder for configuring and constructing an instance of an Alpha Vantage client.
-        /// </summary>
-        /// <returns>An <see cref="IBuilder{IAlphaVantageClient}"/> that can be used to configure and build an <see
-        /// cref="IAlphaVantageClient"/> instance.</returns>
-        public static IAlphaVantageClientBuilder GetBuilder()
-        {
-            return new AlphaVantageClientBuilder();
-        }
-
+        return new AlphaVantageClientBuilder();
     }
 
     /// <summary>
@@ -72,6 +68,17 @@ public static class AlphaVantageClientExtensions
     public static async Task<JsonDocument> SymbolSearchAsync(this IAlphaVantageClient client, string symbol)
         => await client.GetJsonDocumentAsync(AlphaVantageFunction.SYMBOL_SEARCH, symbol);
 
+    /// <summary>
+    /// Retrieves and parses the global quote data for the specified stock symbol into a strongly-typed response.
+    /// </summary>
+    /// <param name="client">The Alpha Vantage client instance.</param>
+    /// <param name="symbol">The stock symbol to retrieve the global quote for.</param>
+    /// <returns>A <see cref="Task{AlphaVantageResponse}"/> containing either the parsed <see cref="GlobalQuote"/> data or error information.</returns>
+    /// <remarks>
+    /// This method calls the Alpha Vantage Global Quote API and parses the JSON response into a strongly-typed
+    /// <see cref="GlobalQuote"/> object. If the API returns an error or the data cannot be parsed, the response
+    /// will contain an error message in the <see cref="AlphaVantageResponse{T}.ErrorMessage"/> property.
+    /// </remarks>
     public static async Task<AlphaVantageResponse<GlobalQuote>> GlobalQuote(this IAlphaVantageClient client, string symbol)
     {
         var jsonDocument = await client.GlobalQuoteAsync(symbol);
@@ -116,6 +123,18 @@ public static class AlphaVantageClientExtensions
         };
     }
 
+    /// <summary>
+    /// Retrieves global quote data for multiple stock symbols concurrently.
+    /// </summary>
+    /// <param name="client">The Alpha Vantage client instance.</param>
+    /// <param name="symbols">An enumerable collection of stock symbols to retrieve global quotes for.</param>
+    /// <returns>A <see cref="Task{IDictionary}"/> containing a dictionary where keys are stock symbols and values are the corresponding <see cref="AlphaVantageResponse{GlobalQuote}"/> data.</returns>
+    /// <remarks>
+    /// This method executes multiple API calls concurrently to fetch global quote data for all provided symbols.
+    /// Each symbol's result is returned as a separate <see cref="AlphaVantageResponse{GlobalQuote}"/> in the dictionary,
+    /// allowing individual error handling per symbol. Failed requests will have error information in their respective
+    /// <see cref="AlphaVantageResponse{T}.ErrorMessage"/> property.
+    /// </remarks>
     public static async Task<IDictionary<string, AlphaVantageResponse<GlobalQuote>>> GlobalQuotes(this IAlphaVantageClient client, IEnumerable<string> symbols)
     {
         var tasks = symbols.Select(symbol => client.GlobalQuote(symbol));

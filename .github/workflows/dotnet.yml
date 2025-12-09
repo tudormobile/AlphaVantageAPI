@@ -41,7 +41,8 @@ jobs:
 
     - name: Documentation
       run: |
-        dotnet tool update -g docfx
+        dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github-packages "https://nuget.pkg.github.com/dotnet/index.json"
+        dotnet tool update -g docfx --add-source github-packages --prerelease
         docfx docs/docfx.json
 
     - name: Upload Package

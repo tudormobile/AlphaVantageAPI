@@ -10,7 +10,7 @@ public class GlobalQuote
     /// Gets the stock symbol or ticker for this quote.
     /// </summary>
     /// <value>The stock symbol (e.g., "AAPL", "MSFT") that uniquely identifies the security.</value>
-    public string Symbol { get; init; }
+    public string Symbol { get; init; } = String.Empty;
     
     /// <summary>
     /// Gets the opening price of the security for the latest trading day.
