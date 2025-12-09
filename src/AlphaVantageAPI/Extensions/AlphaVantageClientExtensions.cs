@@ -11,7 +11,7 @@ namespace Tudormobile.AlphaVantage.Extensions;
 /// client setup and integration scenarios.</remarks>
 public static class AlphaVantageClientExtensions
 {
-    extension(IAlphaVantageClient client)
+    extension(IAlphaVantageClient)
     {
         /// <summary>
         /// Creates a new builder for configuring and constructing an instance of an Alpha Vantage client.
