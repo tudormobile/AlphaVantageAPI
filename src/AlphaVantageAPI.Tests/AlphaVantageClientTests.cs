@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Text;
 using Tudormobile.AlphaVantage;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Diagnostics.CodeAnalysis;
 
 namespace AlphaVantageAPI.Tests;
 
@@ -125,7 +121,7 @@ public class AlphaVantageClientTests
     }
 
     [TestMethod]
-    public async Task GetJsonStringAsync_Withsss()
+    public async Task GetJsonStringAsync_SymbolSearch_ReturnsValidJson()
     {
         // Arrange
         var apiKey = "test-key"; // Alpha Vantage provides a demo API key for testing

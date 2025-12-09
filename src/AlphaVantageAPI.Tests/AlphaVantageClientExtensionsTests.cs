@@ -106,7 +106,7 @@ public class AlphaVantageClientExtensionsTests
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").Build();
         var actual = await client.GlobalQuote("IBM");
         Assert.IsTrue(actual.IsSuccess);
-        Assert.AreEqual("IBM", actual.Result?.Symbol);
+        Assert.AreEqual("IBM", actual.Result.Symbol);
     }
 
     [TestMethod]

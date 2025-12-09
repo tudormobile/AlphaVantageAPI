@@ -85,44 +85,11 @@ public static class AlphaVantageClientExtensions
     public static async Task<AlphaVantageResponse<GlobalQuote>> GlobalQuote(this IAlphaVantageClient client, string symbol)
     {
         var jsonDocument = await client.GlobalQuoteAsync(symbol);
-        var root = jsonDocument.RootElement;
-        if (root.TryGetProperty("Global Quote", out JsonElement globalQuoteElement))
+        var result = GlobalQuoteBuilder.FromDocument(jsonDocument, symbol);
+        return new AlphaVantageResponse<GlobalQuote>
         {
-            return new AlphaVantageResponse<GlobalQuote>()
-            {
-                Result = new GlobalQuote
-                {
-                    Symbol = globalQuoteElement.GetProperty("01. symbol").GetString() ?? string.Empty,
-                    Open = decimal.Parse(globalQuoteElement.GetProperty("02. open").GetString() ?? "0"),
-                    High = decimal.Parse(globalQuoteElement.GetProperty("03. high").GetString() ?? "0"),
-                    Low = decimal.Parse(globalQuoteElement.GetProperty("04. low").GetString() ?? "0"),
-                    Price = decimal.Parse(globalQuoteElement.GetProperty("05. price").GetString() ?? "0"),
-                    Volume = long.Parse(globalQuoteElement.GetProperty("06. volume").GetString() ?? "0"),
-                    LatestTradingDay = DateOnly.Parse(globalQuoteElement.GetProperty("07. latest trading day").GetString() ?? DateTime.MinValue.ToString()),
-                    PreviousClose = decimal.Parse(globalQuoteElement.GetProperty("08. previous close").GetString() ?? "0"),
-                    Change = decimal.Parse(globalQuoteElement.GetProperty("09. change").GetString() ?? "0")
-                }
-            };
-        }
-        var info = root.TryGetProperty("Information", out JsonElement informationElement);
-        if (info)
-        {
-            return new AlphaVantageResponse<GlobalQuote>()
-            {
-                ErrorMessage = informationElement.GetString() ?? "Global Quote data not found."
-            };
-        }
-        var error = root.TryGetProperty("Error Message", out JsonElement errorElement);
-        if (error)
-        {
-            return new AlphaVantageResponse<GlobalQuote>()
-            {
-                ErrorMessage = errorElement.GetString() ?? "Global Quote data not found."
-            };
-        }
-        return new AlphaVantageResponse<GlobalQuote>()
-        {
-            ErrorMessage = "Global Quote data not found."
+            Result = result,
+            ErrorMessage = result == null ? FindErrorMessage(jsonDocument.RootElement, "Global Quote data not found.") : null
         };
     }
 
@@ -140,10 +107,80 @@ public static class AlphaVantageClientExtensions
     /// </remarks>
     public static async Task<IDictionary<string, AlphaVantageResponse<GlobalQuote>>> GlobalQuotes(this IAlphaVantageClient client, IEnumerable<string> symbols)
     {
-        var tasks = symbols.Select(symbol => client.GlobalQuote(symbol));
+        var symbolsList = symbols.ToList();
+        var tasks = symbolsList.Select(symbol => client.GlobalQuote(symbol));
         var results = await Task.WhenAll(tasks);
-        return results.Select((result, index) => new { Symbol = symbols.ElementAt(index), Result = result })
-            .ToDictionary(x => x.Symbol, x => x.Result);
+        return symbolsList.Zip(results, (symbol, result) => new { symbol, result })
+            .ToDictionary(x => x.symbol, x => x.result);
     }
 
+    /// <summary>
+    /// Retrieves and parses daily time series data for the specified stock symbol into a strongly-typed response.
+    /// </summary>
+    /// <param name="client">The Alpha Vantage client instance.</param>
+    /// <param name="symbol">The stock symbol to retrieve daily time series data for.</param>
+    /// <returns>A <see cref="Task{AlphaVantageResponse}"/> containing either the parsed <see cref="TimeSeries"/> data with daily interval or error information.</returns>
+    /// <remarks>
+    /// This method calls the Alpha Vantage Daily Time Series API and parses the JSON response into a strongly-typed
+    /// <see cref="TimeSeries"/> object with <see cref="TimeSeries.TimeSeriesInterval.Daily"/> interval. If the API
+    /// returns an error or the data cannot be parsed, the response will contain an error message in the
+    /// <see cref="AlphaVantageResponse{T}.ErrorMessage"/> property.
+    /// </remarks>
+    public static async Task<AlphaVantageResponse<TimeSeries>> Daily(this IAlphaVantageClient client, string symbol)
+        => TimeSeriesResult(await client.TimeSeriesDailyAsync(symbol), symbol, TimeSeries.TimeSeriesInterval.Daily);
+
+    /// <summary>
+    /// Retrieves and parses weekly time series data for the specified stock symbol into a strongly-typed response.
+    /// </summary>
+    /// <param name="client">The Alpha Vantage client instance.</param>
+    /// <param name="symbol">The stock symbol to retrieve weekly time series data for.</param>
+    /// <param name="adjusted">If true, returns adjusted weekly data that accounts for stock splits and dividends; otherwise, returns unadjusted weekly data. Default is false.</param>
+    /// <returns>A <see cref="Task{AlphaVantageResponse}"/> containing either the parsed <see cref="TimeSeries"/> data with weekly interval or error information.</returns>
+    /// <remarks>
+    /// This method calls the Alpha Vantage Weekly Time Series API and parses the JSON response into a strongly-typed
+    /// <see cref="TimeSeries"/> object with <see cref="TimeSeries.TimeSeriesInterval.Weekly"/> interval. If the API
+    /// returns an error or the data cannot be parsed, the response will contain an error message in the
+    /// <see cref="AlphaVantageResponse{T}.ErrorMessage"/> property.
+    /// </remarks>
+    public static async Task<AlphaVantageResponse<TimeSeries>> Weekly(this IAlphaVantageClient client, string symbol, bool adjusted = false)
+        => TimeSeriesResult(await client.TimeSeriesWeeklyAsync(symbol, adjusted), symbol, TimeSeries.TimeSeriesInterval.Weekly);
+
+    /// <summary>
+    /// Retrieves and parses monthly time series data for the specified stock symbol into a strongly-typed response.
+    /// </summary>
+    /// <param name="client">The Alpha Vantage client instance.</param>
+    /// <param name="symbol">The stock symbol to retrieve monthly time series data for.</param>
+    /// <param name="adjusted">If true, returns adjusted monthly data that accounts for stock splits and dividends; otherwise, returns unadjusted monthly data. Default is false.</param>
+    /// <returns>A <see cref="Task{AlphaVantageResponse}"/> containing either the parsed <see cref="TimeSeries"/> data with monthly interval or error information.</returns>
+    /// <remarks>
+    /// This method calls the Alpha Vantage Monthly Time Series API and parses the JSON response into a strongly-typed
+    /// <see cref="TimeSeries"/> object with <see cref="TimeSeries.TimeSeriesInterval.Monthly"/> interval. If the API
+    /// returns an error or the data cannot be parsed, the response will contain an error message in the
+    /// <see cref="AlphaVantageResponse{T}.ErrorMessage"/> property.
+    /// </remarks>
+    public static async Task<AlphaVantageResponse<TimeSeries>> Monthly(this IAlphaVantageClient client, string symbol, bool adjusted = false)
+        => TimeSeriesResult(await client.TimeSeriesMonthlyAsync(symbol, adjusted), symbol, TimeSeries.TimeSeriesInterval.Monthly);
+
+    private static AlphaVantageResponse<TimeSeries> TimeSeriesResult(JsonDocument jsonDocument, string symbol, TimeSeries.TimeSeriesInterval interval)
+    {
+        var result = TimeSeriesBuilder.FromDocument(jsonDocument, symbol, interval);
+        return new AlphaVantageResponse<TimeSeries>
+        {
+            Result = result,
+            ErrorMessage = result == null ? FindErrorMessage(jsonDocument.RootElement, "Time series data not found.") : null
+        };
+    }
+
+    private static string? FindErrorMessage(JsonElement root, string defaultMessage)
+    {
+        if (root.TryGetProperty("Information", out JsonElement informationElement))
+        {
+            return informationElement.GetString();
+        }
+        if (root.TryGetProperty("Error Message", out JsonElement errorElement))
+        {
+            return errorElement.GetString();
+        }
+        return defaultMessage;
+    }
 }

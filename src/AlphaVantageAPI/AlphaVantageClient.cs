@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace Tudormobile.AlphaVantage;
 
@@ -16,7 +12,7 @@ namespace Tudormobile.AlphaVantage;
 public class AlphaVantageClient : IAlphaVantageClient
 {
     private readonly string _apiKey;
-    private HttpClient? _httpClient;
+    private static readonly HttpClient _httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(30) };
 
     /// <summary>
     /// Initializes a new instance of the AlphaVantageClient class using the specified API key.
@@ -41,8 +37,8 @@ public class AlphaVantageClient : IAlphaVantageClient
         AlphaVantageFunction function,
         string symbol)
     {
-        using var reader = new StreamReader(await GetStreamAsync(function, symbol));
-        return await reader.ReadToEndAsync();
+        using var reader = new StreamReader(await GetStreamAsync(function, symbol).ConfigureAwait(false));
+        return await reader.ReadToEndAsync().ConfigureAwait(false);
     }
 
     /// <summary>
@@ -55,7 +51,10 @@ public class AlphaVantageClient : IAlphaVantageClient
     public async Task<JsonDocument> GetJsonDocumentAsync(
         AlphaVantageFunction function,
         string symbol)
-        => await JsonDocument.ParseAsync(await GetStreamAsync(function, symbol));
+    {
+        using var stream = await GetStreamAsync(function, symbol).ConfigureAwait(false);
+        return await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+    }
 
     private async Task<Stream> GetStreamAsync(
         AlphaVantageFunction function,
@@ -65,10 +64,9 @@ public class AlphaVantageClient : IAlphaVantageClient
             ? $"&keywords={Uri.EscapeDataString(symbolOrKeywords)}"
             : $"&symbol={Uri.EscapeDataString(symbolOrKeywords)}";
         var url = $"https://www.alphavantage.co/query?function={function}{symOrKey}&apikey={Uri.EscapeDataString(_apiKey)}";
-        var client = _httpClient ??= new HttpClient();
-        var response = await client.GetAsync(url);
+        var response = await _httpClient.GetAsync(url).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadAsStreamAsync();
+        return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
     }
 }
 
