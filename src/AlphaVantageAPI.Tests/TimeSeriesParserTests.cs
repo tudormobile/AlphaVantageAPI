@@ -192,7 +192,7 @@ public class TimeSeriesParserTests
         var document = JsonDocument.Parse(invalidJson);
         Assert.ThrowsExactly<FormatException>(() =>
         {
-            var timeSeries = TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
+            TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
         });
     }
 
