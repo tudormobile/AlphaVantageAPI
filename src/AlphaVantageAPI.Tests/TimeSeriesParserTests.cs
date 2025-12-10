@@ -202,7 +202,7 @@ public class TimeSeriesParserTests
         var document = JsonDocument.Parse(jsonDaily);
         Assert.ThrowsExactly<NotSupportedException>(() =>
         {
-            var timeSeries = TimeSeriesParser.FromDocument(document, "IBM", (TimeSeries.TimeSeriesInterval)999);
+            TimeSeriesParser.FromDocument(document, "IBM", (TimeSeries.TimeSeriesInterval)999);
         });
     }
 
