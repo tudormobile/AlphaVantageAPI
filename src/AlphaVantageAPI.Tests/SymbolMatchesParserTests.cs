@@ -104,7 +104,7 @@ public class SymbolMatchesParserTests
     }
 
 
-    private string invalidJson = @"
+    private readonly string invalidJson = @"
 {
     ""bestMatches"": [
         {
