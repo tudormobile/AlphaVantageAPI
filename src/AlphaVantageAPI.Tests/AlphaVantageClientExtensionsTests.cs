@@ -35,7 +35,7 @@ public class AlphaVantageClientExtensionsTests
     {
         var expected = JsonValueKind.Object;
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").Build();
-        var doc = await client.GlobalQuoteAsync("IBM");
+        var doc = await client.GlobalQuoteJsonAsync("IBM");
         var actual = doc.RootElement;
         Assert.AreEqual(expected, actual.ValueKind);
     }
@@ -45,7 +45,7 @@ public class AlphaVantageClientExtensionsTests
     {
         var expected = JsonValueKind.Object;
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").Build();
-        var doc = await client.TimeSeriesDailyAsync("IBM");
+        var doc = await client.TimeSeriesDailyJsonAsync("IBM");
         var actual = doc.RootElement;
         Assert.AreEqual(expected, actual.ValueKind);
     }
@@ -55,7 +55,7 @@ public class AlphaVantageClientExtensionsTests
     {
         var expected = JsonValueKind.Object;
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").Build();
-        var doc = await client.TimeSeriesMonthlyAsync("IBM");
+        var doc = await client.TimeSeriesMonthlyJsonAsync("IBM");
         var actual = doc.RootElement;
         Assert.AreEqual(expected, actual.ValueKind);
     }
@@ -65,7 +65,7 @@ public class AlphaVantageClientExtensionsTests
     {
         var expected = JsonValueKind.Object;
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").Build();
-        var doc = await client.TimeSeriesMonthlyAsync("IBM", adjusted: true);
+        var doc = await client.TimeSeriesMonthlyJsonAsync("IBM", adjusted: true);
         var actual = doc.RootElement;
         Assert.AreEqual(expected, actual.ValueKind);
     }
@@ -75,7 +75,7 @@ public class AlphaVantageClientExtensionsTests
     {
         var expected = JsonValueKind.Object;
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").Build();
-        var doc = await client.TimeSeriesWeeklyAsync("IBM");
+        var doc = await client.TimeSeriesWeeklyJsonAsync("IBM");
         var actual = doc.RootElement;
         Assert.AreEqual(expected, actual.ValueKind);
     }
@@ -85,7 +85,7 @@ public class AlphaVantageClientExtensionsTests
     {
         var expected = JsonValueKind.Object;
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").Build();
-        var doc = await client.TimeSeriesWeeklyAsync("IBM", adjusted: true);
+        var doc = await client.TimeSeriesWeeklyJsonAsync("IBM", adjusted: true);
         var actual = doc.RootElement;
         Assert.AreEqual(expected, actual.ValueKind);
     }
@@ -95,7 +95,7 @@ public class AlphaVantageClientExtensionsTests
     {
         var expected = JsonValueKind.Object;
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").Build();
-        var doc = await client.SymbolSearchAsync("IBM");
+        var doc = await client.SymbolSearchJsonAsync("IBM");
         var actual = doc.RootElement;
         Assert.AreEqual(expected, actual.ValueKind);
     }
@@ -104,7 +104,7 @@ public class AlphaVantageClientExtensionsTests
     public async Task GlobalQuoteEntityTest()
     {
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").Build();
-        var actual = await client.GlobalQuote("IBM");
+        var actual = await client.GetGlobalQuoteAsync("IBM");
         Assert.IsTrue(actual.IsSuccess);
         Assert.AreEqual("IBM", actual.Result.Symbol);
     }
@@ -114,7 +114,7 @@ public class AlphaVantageClientExtensionsTests
     {
         // note: the demo API key only works with IBM symbol
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").Build();
-        var actual = await client.GlobalQuote("ABCDEFG");
+        var actual = await client.GetGlobalQuoteAsync("ABCDEFG");
         Assert.IsFalse(actual.IsSuccess);
         Assert.IsNotNull(actual.ErrorMessage);
         Assert.IsNull(actual.Result);
@@ -124,7 +124,7 @@ public class AlphaVantageClientExtensionsTests
     public async Task GlobalQuoteEntityTestWithMultipleSymbols()
     {
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").Build();
-        var actual = await client.GlobalQuotes(["IBM", "APPL", "MSFT"]);
+        var actual = await client.GetGlobalQuotesAsync(["IBM", "APPL", "MSFT"]);
         Assert.HasCount(3, actual);
     }
 
