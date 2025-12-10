@@ -7,7 +7,7 @@ namespace AlphaVantageAPI.Tests;
 [TestClass]
 public class TimeSeriesParserTests
 {
-    string jsonDaily = @"
+    readonly string jsonDaily = @"
 {
     ""Meta Data"": {
         ""1. Information"": ""Daily Prices (open, high, low, close) and Volumes"",
