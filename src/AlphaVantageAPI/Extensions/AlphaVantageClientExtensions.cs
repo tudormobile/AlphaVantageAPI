@@ -152,7 +152,12 @@ public static class AlphaVantageClientExtensions
     /// <see cref="AlphaVantageResponse{T}.ErrorMessage"/> property.
     /// </remarks>
     public static async Task<AlphaVantageResponse<TimeSeries>> GetWeeklyTimeSeriesAsync(this IAlphaVantageClient client, string symbol, bool adjusted = false, CancellationToken cancellationToken = default)
-        => TimeSeriesResult(await client.TimeSeriesWeeklyJsonAsync(symbol, adjusted, cancellationToken), symbol, TimeSeries.TimeSeriesInterval.Weekly);
+    {
+        using (var jsonDoc = await client.TimeSeriesWeeklyJsonAsync(symbol, adjusted, cancellationToken))
+        {
+            return TimeSeriesResult(jsonDoc, symbol, TimeSeries.TimeSeriesInterval.Weekly);
+        }
+    }
 
     /// <summary>
     /// Retrieves and parses monthly time series data for the specified stock symbol into a strongly-typed response.
