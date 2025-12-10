@@ -1,4 +1,4 @@
-## AlphaVanatage API Library Namespaces
+## AlphaVantage API Library Namespaces
 The namespaces available in the *Tudormobile.AlphaVantageAPI* library are described below. In several cases, including the namespace is required to expose extension methods provided.
 
 ### Tudormobile.AlphaVantageAPI.dll

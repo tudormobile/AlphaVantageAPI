@@ -68,5 +68,5 @@ public class GlobalQuote
     /// The percentage is calculated as (Change / PreviousClose * 100). 
     /// Returns "0.00%" if PreviousClose is zero to avoid division by zero.
     /// </remarks>
-    public string ChangePercent => $"{(PreviousClose != 0 ? (Change / PreviousClose * 100) : 0):F2}%";
+    public string ChangePercent => $"{(PreviousClose != 0 ? (Change / PreviousClose * 100) : 0):F3}%";
 }

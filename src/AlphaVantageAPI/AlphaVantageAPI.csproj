@@ -3,8 +3,8 @@
     <PropertyGroup>
         <AssemblyName>Tudormobile.$(MSBuildProjectName)</AssemblyName>
         <RootNamespace>Tudormobile.$(MSBuildProjectName.Replace("API", ""))</RootNamespace>
-        <Product>Tudormobile AphaVantage API</Product>
-        <Description>Tudormobile AphaVantage API Library</Description>
+        <Product>Tudormobile AlphaVantage API</Product>
+        <Description>Tudormobile AlphaVantage API Library</Description>
         <PackageTags>AlphaVantage;Tudormobile</PackageTags>
     </PropertyGroup>
 

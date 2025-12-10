@@ -38,4 +38,4 @@ var symbol = "IBM";
 var json = client.GlobalQuote(symbol);
 ```
 
-[NuGET Package README](docs/README.md) | [Source Code README](src/README.md) | [API Documentation](https://tudormobile.github.io/AlphaVanatageAPI/)
+[NuGET Package README](docs/README.md) | [Source Code README](src/README.md) | [API Documentation](https://tudormobile.github.io/AlphaVantageAPI/)

@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
+﻿using System.Reflection;
 using Tudormobile.AlphaVantage;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Diagnostics.CodeAnalysis;
 
 namespace AlphaVantageAPI.Tests;
 
@@ -27,7 +22,7 @@ public class AlphaVantageClientTests
         Assert.AreEqual(expected, actual);
     }
 
-    [TestMethod, ExcludeFromCodeCoverage]
+    [TestMethod]
     public void Constructor_WithNullApiKey_ThrowsArgumentException()
     {
         // Act & Assert
@@ -37,7 +32,7 @@ public class AlphaVantageClientTests
         Assert.AreEqual("apiKey", ex.ParamName);
     }
 
-    [TestMethod, ExcludeFromCodeCoverage]
+    [TestMethod]
     public void Constructor_WithEmptyApiKey_ThrowsArgumentException()
     {
         // Act & Assert
@@ -45,7 +40,7 @@ public class AlphaVantageClientTests
         Assert.AreEqual("apiKey", ex.ParamName);
     }
 
-    [TestMethod, ExcludeFromCodeCoverage]
+    [TestMethod]
     public void Constructor_WithWhitespaceApiKey_ThrowsArgumentException()
     {
         // Act & Assert
@@ -53,7 +48,7 @@ public class AlphaVantageClientTests
         Assert.AreEqual("apiKey", ex.ParamName);
     }
 
-    [TestMethod, ExcludeFromCodeCoverage]
+    [TestMethod]
     public void Constructor_WithWhitespaceTabsApiKey_ThrowsArgumentException()
     {
         // Act & Assert
@@ -125,7 +120,7 @@ public class AlphaVantageClientTests
     }
 
     [TestMethod]
-    public async Task GetJsonStringAsync_Withsss()
+    public async Task GetJsonStringAsync_SymbolSearch_ReturnsValidJson()
     {
         // Arrange
         var apiKey = "test-key"; // Alpha Vantage provides a demo API key for testing
