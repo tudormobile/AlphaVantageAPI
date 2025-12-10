@@ -174,8 +174,10 @@ public static class AlphaVantageClientExtensions
     /// <see cref="AlphaVantageResponse{T}.ErrorMessage"/> property.
     /// </remarks>
     public static async Task<AlphaVantageResponse<TimeSeries>> GetMonthlyTimeSeriesAsync(this IAlphaVantageClient client, string symbol, bool adjusted = false, CancellationToken cancellationToken = default)
-        => TimeSeriesResult(await client.TimeSeriesMonthlyJsonAsync(symbol, adjusted, cancellationToken), symbol, TimeSeries.TimeSeriesInterval.Monthly);
-
+    {
+        using var jsonDocument = await client.TimeSeriesMonthlyJsonAsync(symbol, adjusted, cancellationToken);
+        return TimeSeriesResult(jsonDocument, symbol, TimeSeries.TimeSeriesInterval.Monthly);
+    }
     /// <summary>
     /// Searches for financial symbols that match the specified keywords using the Alpha Vantage API.
     /// </summary>
