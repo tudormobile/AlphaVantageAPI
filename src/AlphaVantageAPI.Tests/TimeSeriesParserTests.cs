@@ -6,7 +6,7 @@ using Tudormobile.AlphaVantage.Extensions;
 namespace AlphaVantageAPI.Tests;
 
 [TestClass]
-public class TimeSeriesBuilderTests
+public class TimeSeriesParserTests
 {
     string jsonDaily = @"
 {
@@ -96,7 +96,7 @@ public class TimeSeriesBuilderTests
     [TestMethod]
     public void TestBuildDailyTimeSeries()
     {
-        var timeSeries = TimeSeriesBuilder.FromDocument(JsonDocument.Parse(jsonDaily), "IBM", TimeSeries.TimeSeriesInterval.Daily);
+        var timeSeries = TimeSeriesParser.FromDocument(JsonDocument.Parse(jsonDaily), "IBM", TimeSeries.TimeSeriesInterval.Daily);
 
         Assert.IsNotNull(timeSeries);
         Assert.AreEqual(TimeSeries.TimeSeriesInterval.Daily, timeSeries.Interval);
@@ -124,7 +124,7 @@ public class TimeSeriesBuilderTests
     [TestMethod]
     public void TestBuildWeeklyTimeSeries()
     {
-        var timeSeries = TimeSeriesBuilder.FromDocument(JsonDocument.Parse(jsonWeekly), "IBM", TimeSeries.TimeSeriesInterval.Weekly);
+        var timeSeries = TimeSeriesParser.FromDocument(JsonDocument.Parse(jsonWeekly), "IBM", TimeSeries.TimeSeriesInterval.Weekly);
         Assert.IsNotNull(timeSeries);
         Assert.AreEqual(TimeSeries.TimeSeriesInterval.Weekly, timeSeries.Interval);
         Assert.AreEqual("IBM", timeSeries.Symbol);
@@ -143,7 +143,7 @@ public class TimeSeriesBuilderTests
     [TestMethod]
     public void TestMonthlyTimeSeries()
     {
-        var timeSeries = TimeSeriesBuilder.FromDocument(JsonDocument.Parse(jsonMonthly), "IBM", TimeSeries.TimeSeriesInterval.Monthly);
+        var timeSeries = TimeSeriesParser.FromDocument(JsonDocument.Parse(jsonMonthly), "IBM", TimeSeries.TimeSeriesInterval.Monthly);
         Assert.IsNotNull(timeSeries);
         Assert.AreEqual(TimeSeries.TimeSeriesInterval.Monthly, timeSeries.Interval);
         Assert.AreEqual("IBM", timeSeries.Symbol);
@@ -162,7 +162,7 @@ public class TimeSeriesBuilderTests
     public void TestFromDocumentWithEmptyDocument()
     {
         var document = JsonDocument.Parse("{}");
-        var timeSeries = TimeSeriesBuilder.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
+        var timeSeries = TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
         Assert.IsNull(timeSeries);
     }
 
@@ -172,7 +172,7 @@ public class TimeSeriesBuilderTests
         var document = JsonDocument.Parse(jsonDaily);
         Assert.ThrowsExactly<ArgumentException>(() =>
         {
-            var timeSeries = TimeSeriesBuilder.FromDocument(document, "AAPL", TimeSeries.TimeSeriesInterval.Daily);
+            var timeSeries = TimeSeriesParser.FromDocument(document, "AAPL", TimeSeries.TimeSeriesInterval.Daily);
         });
     }
 
@@ -193,7 +193,7 @@ public class TimeSeriesBuilderTests
         var document = JsonDocument.Parse(invalidJson);
         Assert.ThrowsExactly<FormatException>(() =>
         {
-            var timeSeries = TimeSeriesBuilder.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
+            var timeSeries = TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
         });
     }
 
@@ -203,7 +203,7 @@ public class TimeSeriesBuilderTests
         var document = JsonDocument.Parse(jsonDaily);
         Assert.ThrowsExactly<NotSupportedException>(() =>
         {
-            var timeSeries = TimeSeriesBuilder.FromDocument(document, "IBM", (TimeSeries.TimeSeriesInterval)999);
+            var timeSeries = TimeSeriesParser.FromDocument(document, "IBM", (TimeSeries.TimeSeriesInterval)999);
         });
     }
 
@@ -230,7 +230,7 @@ public class TimeSeriesBuilderTests
     }
 }";
         var document = JsonDocument.Parse(badJson);
-        var timeSeries = TimeSeriesBuilder.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
+        var timeSeries = TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
         Assert.IsNotNull(timeSeries);
         Assert.AreEqual(1, timeSeries.Data!.Count);
         var entry = timeSeries.Data!.First();

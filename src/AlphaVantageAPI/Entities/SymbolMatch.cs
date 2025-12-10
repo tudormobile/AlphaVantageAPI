@@ -65,26 +65,90 @@ public class SymbolMatch
     /// <remarks>A score of 1.0 represents a perfect match, while lower scores indicate partial matches.</remarks>
     public double MatchScore { get; init; }
 
+    /// <summary>
+    /// Defines the types of financial instruments that can be matched in symbol search results.
+    /// </summary>
     public enum MatchTypes
     {
+        /// <summary>
+        /// Matches any financial instrument type without filtering.
+        /// </summary>
         Any = -1,
+
+        /// <summary>
+        /// Represents an unknown or unrecognized financial instrument type.
+        /// </summary>
         Unknown = 0,
+
+        /// <summary>
+        /// Represents equity securities such as common stock or preferred stock.
+        /// </summary>
         Equity,
+
+        /// <summary>
+        /// Represents Exchange-Traded Funds (ETFs).
+        /// </summary>
         ETF,
+
+        /// <summary>
+        /// Represents mutual fund investments.
+        /// </summary>
         MutualFund,
+
+        /// <summary>
+        /// Represents market indices that track the performance of a group of securities.
+        /// </summary>
         Index,
+
+        /// <summary>
+        /// Represents commodity investments such as gold, oil, or agricultural products.
+        /// </summary>
         Commodity,
+
+        /// <summary>
+        /// Represents foreign exchange (forex) currency pairs.
+        /// </summary>
         Currency,
+
+        /// <summary>
+        /// Represents digital or cryptocurrency assets.
+        /// </summary>
         Cryptocurrency,
+
+        /// <summary>
+        /// Represents fixed-income debt securities.
+        /// </summary>
         Bond
     }
 
+    /// <summary>
+    /// Defines the geographic regions where financial instruments can be traded.
+    /// </summary>
     public enum Regions
     {
+        /// <summary>
+        /// Matches any geographic region without filtering.
+        /// </summary>
         Any = -1,
+
+        /// <summary>
+        /// Represents an unknown or unrecognized region.
+        /// </summary>
         Unknown = 0,
+
+        /// <summary>
+        /// Represents the United States market.
+        /// </summary>
         US,
+
+        /// <summary>
+        /// Represents the United Kingdom market.
+        /// </summary>
         UK,
+
+        /// <summary>
+        /// Represents the Frankfurt (Germany) market.
+        /// </summary>
         FFM,
     }
 }

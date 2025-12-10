@@ -1,7 +1,7 @@
 ﻿namespace AlphaVantageAPI.Tests;
 
 [TestClass]
-public class GlobalQuoteBuilderTests
+public class GlobalQuoteParserTests
 {
     [TestMethod]
     public void TestFromDocument()
@@ -21,7 +21,7 @@ public class GlobalQuoteBuilderTests
             }
         }";
         var jsonDocument = System.Text.Json.JsonDocument.Parse(json);
-        var globalQuote = Tudormobile.AlphaVantage.Extensions.GlobalQuoteBuilder.FromDocument(jsonDocument, "IBM");
+        var globalQuote = Tudormobile.AlphaVantage.Extensions.GlobalQuoteParser.FromDocument(jsonDocument, "IBM");
         Assert.IsNotNull(globalQuote);
         Assert.AreEqual("IBM", globalQuote!.Symbol);
         Assert.AreEqual(125.0000m, globalQuote.Open);
@@ -54,7 +54,7 @@ public class GlobalQuoteBuilderTests
             }
         }";
         var jsonDocument = System.Text.Json.JsonDocument.Parse(json);
-        var globalQuote = Tudormobile.AlphaVantage.Extensions.GlobalQuoteBuilder.FromDocument(jsonDocument, "IBM");
+        var globalQuote = Tudormobile.AlphaVantage.Extensions.GlobalQuoteParser.FromDocument(jsonDocument, "IBM");
 
         Assert.IsNotNull(globalQuote);
         Assert.AreEqual("", globalQuote.Symbol);

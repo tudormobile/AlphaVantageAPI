@@ -5,14 +5,14 @@ using Tudormobile.AlphaVantage.Extensions;
 namespace AlphaVantageAPI.Tests;
 
 [TestClass]
-public class SymbolMatchesBuilderTests
+public class SymbolMatchesParserTests
 {
     [TestMethod]
     public void FromDocumentTest()
     {
         var keywords = "Apple";
         var doc = JsonDocument.Parse(json);
-        var result = SymbolMatchesBuilder.FromDocument(doc, keywords);
+        var result = SymbolMatchesParser.FromDocument(doc, keywords);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(keywords, result.Keywords);
@@ -36,7 +36,7 @@ public class SymbolMatchesBuilderTests
     {
         var keywords = "Tesco";
         var doc = JsonDocument.Parse(json);
-        var result = SymbolMatchesBuilder.FromDocument(doc, keywords, SymbolMatch.MatchTypes.Equity, SymbolMatch.Regions.US);
+        var result = SymbolMatchesParser.FromDocument(doc, keywords, SymbolMatch.MatchTypes.Equity, SymbolMatch.Regions.US);
         Assert.IsNotNull(result);
         Assert.AreEqual(keywords, result.Keywords);
         Assert.HasCount(2, result.Matches);
@@ -52,7 +52,7 @@ public class SymbolMatchesBuilderTests
     {
         var keywords = "Tesco";
         var doc = JsonDocument.Parse(@"{ ""bestMatches"": [] }");
-        var result = SymbolMatchesBuilder.FromDocument(doc, keywords);
+        var result = SymbolMatchesParser.FromDocument(doc, keywords);
         Assert.IsNotNull(result);
         Assert.AreEqual(keywords, result.Keywords);
         Assert.HasCount(0, result.Matches);
@@ -63,7 +63,7 @@ public class SymbolMatchesBuilderTests
     {
         var keywords = "Tesco";
         var doc = JsonDocument.Parse(@"{}");
-        var result = SymbolMatchesBuilder.FromDocument(doc, keywords);
+        var result = SymbolMatchesParser.FromDocument(doc, keywords);
         Assert.IsNotNull(result);
         Assert.AreEqual(keywords, result.Keywords);
         Assert.HasCount(0, result.Matches);
@@ -74,7 +74,7 @@ public class SymbolMatchesBuilderTests
     {
         var keywords = "Tesco";
         var doc = JsonDocument.Parse(invalidJson);
-        var result = SymbolMatchesBuilder.FromDocument(doc, keywords);
+        var result = SymbolMatchesParser.FromDocument(doc, keywords);
         Assert.IsNotNull(result);
         Assert.AreEqual(keywords, result.Keywords);
         Assert.HasCount(1, result.Matches);
@@ -91,7 +91,7 @@ public class SymbolMatchesBuilderTests
     {
         var keywords = "Tesco";
         var doc = JsonDocument.Parse(nullJson);
-        var result = SymbolMatchesBuilder.FromDocument(doc, keywords);
+        var result = SymbolMatchesParser.FromDocument(doc, keywords);
         Assert.IsNotNull(result);
         Assert.AreEqual(keywords, result.Keywords);
         Assert.HasCount(1, result.Matches);

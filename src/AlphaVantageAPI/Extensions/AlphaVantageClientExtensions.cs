@@ -85,7 +85,7 @@ public static class AlphaVantageClientExtensions
     public static async Task<AlphaVantageResponse<GlobalQuote>> GetGlobalQuoteAsync(this IAlphaVantageClient client, string symbol)
     {
         var jsonDocument = await client.GlobalQuoteJsonAsync(symbol);
-        var result = GlobalQuoteBuilder.FromDocument(jsonDocument, symbol);
+        var result = GlobalQuoteParser.FromDocument(jsonDocument, symbol);
         return new AlphaVantageResponse<GlobalQuote>
         {
             Result = result,
@@ -182,7 +182,7 @@ public static class AlphaVantageClientExtensions
         SymbolMatch.Regions region = SymbolMatch.Regions.Any)
     {
         var jsonDocument = await client.SymbolSearchJsonAsync(keywords);
-        var result = SymbolMatchesBuilder.FromDocument(jsonDocument, keywords, matchType, region);
+        var result = SymbolMatchesParser.FromDocument(jsonDocument, keywords, matchType, region);
         return new AlphaVantageResponse<SymbolMatches>
         {
             Result = result,
@@ -192,7 +192,7 @@ public static class AlphaVantageClientExtensions
 
     private static AlphaVantageResponse<TimeSeries> TimeSeriesResult(JsonDocument jsonDocument, string symbol, TimeSeries.TimeSeriesInterval interval)
     {
-        var result = TimeSeriesBuilder.FromDocument(jsonDocument, symbol, interval);
+        var result = TimeSeriesParser.FromDocument(jsonDocument, symbol, interval);
         return new AlphaVantageResponse<TimeSeries>
         {
             Result = result,
