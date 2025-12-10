@@ -33,7 +33,7 @@ public class TimeSeriesParserTests
         }
     }
 }";
-    string jsonWeekly = @"
+    readonly string jsonWeekly = @"
 {
     ""Meta Data"": {
         ""1. Information"": ""Weekly Prices (open, high, low, close) and Volumes"",
