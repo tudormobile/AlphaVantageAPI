@@ -140,7 +140,7 @@ public class SymbolMatchesParserTests
 }
 ";
 
-    private string json = @"
+    private readonly string json = @"
 {
     ""bestMatches"": [
         {
