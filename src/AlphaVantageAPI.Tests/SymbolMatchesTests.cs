@@ -4,7 +4,7 @@
 public class SymbolMatchesTests
 {
     [TestMethod]
-    public void DefaultContructorTest()
+    public void DefaultConstructorTest()
     {
         var symbolMatches = new Tudormobile.AlphaVantage.Entities.SymbolMatches();
         Assert.IsNotNull(symbolMatches);
