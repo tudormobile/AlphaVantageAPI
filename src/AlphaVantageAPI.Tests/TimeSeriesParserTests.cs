@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Tudormobile.AlphaVantage.Entities;
 using Tudormobile.AlphaVantage.Extensions;
 
@@ -166,7 +165,7 @@ public class TimeSeriesParserTests
         Assert.IsNull(timeSeries);
     }
 
-    [TestMethod, ExcludeFromCodeCoverage]
+    [TestMethod]
     public void TestFromDocumentWithMismatchedSymbol()
     {
         var document = JsonDocument.Parse(jsonDaily);
@@ -176,7 +175,7 @@ public class TimeSeriesParserTests
         });
     }
 
-    [TestMethod, ExcludeFromCodeCoverage]
+    [TestMethod]
     public void TestFromDocumentWithInvalidDateFormat()
     {
         var invalidJson = @"
@@ -197,7 +196,7 @@ public class TimeSeriesParserTests
         });
     }
 
-    [TestMethod, ExcludeFromCodeCoverage]
+    [TestMethod]
     public void TestFromDocumentWithUnsupportedInterval()
     {
         var document = JsonDocument.Parse(jsonDaily);

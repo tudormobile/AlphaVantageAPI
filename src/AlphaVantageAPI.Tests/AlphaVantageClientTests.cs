@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
+﻿using System.Reflection;
 using Tudormobile.AlphaVantage;
 
 namespace AlphaVantageAPI.Tests;
@@ -23,7 +22,7 @@ public class AlphaVantageClientTests
         Assert.AreEqual(expected, actual);
     }
 
-    [TestMethod, ExcludeFromCodeCoverage]
+    [TestMethod]
     public void Constructor_WithNullApiKey_ThrowsArgumentException()
     {
         // Act & Assert
@@ -33,7 +32,7 @@ public class AlphaVantageClientTests
         Assert.AreEqual("apiKey", ex.ParamName);
     }
 
-    [TestMethod, ExcludeFromCodeCoverage]
+    [TestMethod]
     public void Constructor_WithEmptyApiKey_ThrowsArgumentException()
     {
         // Act & Assert
@@ -41,7 +40,7 @@ public class AlphaVantageClientTests
         Assert.AreEqual("apiKey", ex.ParamName);
     }
 
-    [TestMethod, ExcludeFromCodeCoverage]
+    [TestMethod]
     public void Constructor_WithWhitespaceApiKey_ThrowsArgumentException()
     {
         // Act & Assert
@@ -49,7 +48,7 @@ public class AlphaVantageClientTests
         Assert.AreEqual("apiKey", ex.ParamName);
     }
 
-    [TestMethod, ExcludeFromCodeCoverage]
+    [TestMethod]
     public void Constructor_WithWhitespaceTabsApiKey_ThrowsArgumentException()
     {
         // Act & Assert

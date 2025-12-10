@@ -29,7 +29,7 @@ internal class SymbolMatchesParser : EntityParser
                 var score = GetDoubleValue(matchElement, MATCH_SCORE_PROPERTY);
                 var symbolType = GetEnumValue(matchElement, TYPE_PROPERTY, SymbolMatch.MatchTypes.Unknown);
 
-                var regionString = matchElement.GetProperty(REGION_PROPERTY).GetString() ?? "Unknown";
+                var regionString = GetStringValue(matchElement, REGION_PROPERTY, "Unknown");
                 var symbolRegion = ParseRegion(regionString);
 
                 if ((matchType == SymbolMatch.MatchTypes.Any || symbolType == matchType)

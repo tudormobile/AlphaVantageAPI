@@ -16,9 +16,10 @@ public interface IAlphaVantageClient
     /// <param name="function">The Alpha Vantage API function to query. Determines the type of financial data returned.</param>
     /// <param name="symbol">The symbol representing the financial instrument to query. Must be a valid Alpha Vantage symbol; cannot be null
     /// or empty.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the raw JSON string returned by the
     /// Alpha Vantage API.</returns>
-    Task<string> GetJsonStringAsync(AlphaVantageFunction function, string symbol);
+    Task<string> GetJsonStringAsync(AlphaVantageFunction function, string symbol, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously retrieves a JSON document containing data from the Alpha Vantage API for the specified function
@@ -27,7 +28,8 @@ public interface IAlphaVantageClient
     /// <param name="function">The Alpha Vantage function to query, which determines the type of financial data to retrieve.</param>
     /// <param name="symbol">The symbol representing the financial instrument (such as a stock ticker) for which data is requested. Cannot be
     /// null or empty.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="JsonDocument"/> with
     /// the requested data from Alpha Vantage.</returns>
-    Task<JsonDocument> GetJsonDocumentAsync(AlphaVantageFunction function, string symbol);
+    Task<JsonDocument> GetJsonDocumentAsync(AlphaVantageFunction function, string symbol, CancellationToken cancellationToken = default);
 }

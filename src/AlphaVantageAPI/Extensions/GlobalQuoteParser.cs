@@ -13,7 +13,7 @@ internal class GlobalQuoteParser : EntityParser
     private const string PRICE_PROPERTY = "05. price";
     private const string VOLUME_PROPERTY = "06. volume";
     private const string LASTTRADE_PROPERTY = "07. latest trading day";
-    private const string PREVCOSE_PROPERTY = "08. previous close";
+    private const string PREVCLOSE_PROPERTY = "08. previous close";
     private const string CHANGE_PROPERTY = "09. change";
     private const string CHANGEPCT_PROPERTY = "10. change percent";
 
@@ -31,7 +31,7 @@ internal class GlobalQuoteParser : EntityParser
                 Price = GetDecimalValue(globalQuoteElement, PRICE_PROPERTY),
                 Volume = GetLongValue(globalQuoteElement, VOLUME_PROPERTY),
                 LatestTradingDay = GetDateOnlyValue(globalQuoteElement, LASTTRADE_PROPERTY),
-                PreviousClose = GetDecimalValue(globalQuoteElement, PREVCOSE_PROPERTY),
+                PreviousClose = GetDecimalValue(globalQuoteElement, PREVCLOSE_PROPERTY),
                 Change = GetDecimalValue(globalQuoteElement, CHANGE_PROPERTY),
             };
         }

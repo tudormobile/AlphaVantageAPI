@@ -12,7 +12,7 @@ namespace Tudormobile.AlphaVantage;
 public class AlphaVantageClient : IAlphaVantageClient
 {
     private readonly string _apiKey;
-    private static readonly HttpClient _httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(30) };
+    private static readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
 
     /// <summary>
     /// Initializes a new instance of the AlphaVantageClient class using the specified API key.
@@ -32,13 +32,15 @@ public class AlphaVantageClient : IAlphaVantageClient
     /// </summary>
     /// <param name="function">The Alpha Vantage function to query. Determines the type of data returned by the API.</param>
     /// <param name="symbol">The symbol representing the financial instrument to query. Cannot be null or empty.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the JSON response as a string.</returns>
     public async Task<string> GetJsonStringAsync(
         AlphaVantageFunction function,
-        string symbol)
+        string symbol,
+        CancellationToken cancellationToken = default)
     {
-        using var reader = new StreamReader(await GetStreamAsync(function, symbol).ConfigureAwait(false));
-        return await reader.ReadToEndAsync().ConfigureAwait(false);
+        using var reader = new StreamReader(await GetStreamAsync(function, symbol, cancellationToken).ConfigureAwait(false));
+        return await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -46,27 +48,30 @@ public class AlphaVantageClient : IAlphaVantageClient
     /// </summary>
     /// <param name="function">The Alpha Vantage function to query. Determines the type of data to retrieve.</param>
     /// <param name="symbol">The symbol representing the financial instrument to query. Cannot be null or empty.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a JsonDocument representing the
     /// parsed JSON response.</returns>
     public async Task<JsonDocument> GetJsonDocumentAsync(
         AlphaVantageFunction function,
-        string symbol)
+        string symbol,
+        CancellationToken cancellationToken = default)
     {
-        using var stream = await GetStreamAsync(function, symbol).ConfigureAwait(false);
-        return await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+        using var stream = await GetStreamAsync(function, symbol, cancellationToken).ConfigureAwait(false);
+        return await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<Stream> GetStreamAsync(
         AlphaVantageFunction function,
-        string symbolOrKeywords)
+        string symbolOrKeywords,
+        CancellationToken cancellationToken = default)
     {
         var symOrKey = function == AlphaVantageFunction.SYMBOL_SEARCH
             ? $"&keywords={Uri.EscapeDataString(symbolOrKeywords)}"
             : $"&symbol={Uri.EscapeDataString(symbolOrKeywords)}";
         var url = $"https://www.alphavantage.co/query?function={function}{symOrKey}&apikey={Uri.EscapeDataString(_apiKey)}";
-        var response = await _httpClient.GetAsync(url).ConfigureAwait(false);
+        var response = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        return await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
     }
 }
 

@@ -29,9 +29,10 @@ public static class AlphaVantageClientExtensions
     /// </summary>
     /// <param name="client">The Alpha Vantage client instance.</param>
     /// <param name="symbol">The stock symbol to retrieve daily time series data for.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task{JsonDocument}"/> containing the daily time series data.</returns>
-    public static async Task<JsonDocument> TimeSeriesDailyJsonAsync(this IAlphaVantageClient client, string symbol)
-        => await client.GetJsonDocumentAsync(AlphaVantageFunction.TIME_SERIES_DAILY, symbol);
+    public static async Task<JsonDocument> TimeSeriesDailyJsonAsync(this IAlphaVantageClient client, string symbol, CancellationToken cancellationToken = default)
+        => await client.GetJsonDocumentAsync(AlphaVantageFunction.TIME_SERIES_DAILY, symbol, cancellationToken);
 
     /// <summary>
     /// Retrieves monthly time series data for the specified stock symbol.
@@ -39,9 +40,10 @@ public static class AlphaVantageClientExtensions
     /// <param name="client">The Alpha Vantage client instance.</param>
     /// <param name="symbol">The stock symbol to retrieve monthly time series data for.</param>
     /// <param name="adjusted">If true, returns adjusted monthly data; otherwise, returns unadjusted monthly data. Default is false.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task{JsonDocument}"/> containing the monthly time series data.</returns>
-    public static async Task<JsonDocument> TimeSeriesMonthlyJsonAsync(this IAlphaVantageClient client, string symbol, bool adjusted = false)
-        => await client.GetJsonDocumentAsync(adjusted ? AlphaVantageFunction.TIME_SERIES_MONTHLY_ADJUSTED : AlphaVantageFunction.TIME_SERIES_MONTHLY, symbol);
+    public static async Task<JsonDocument> TimeSeriesMonthlyJsonAsync(this IAlphaVantageClient client, string symbol, bool adjusted = false, CancellationToken cancellationToken = default)
+        => await client.GetJsonDocumentAsync(adjusted ? AlphaVantageFunction.TIME_SERIES_MONTHLY_ADJUSTED : AlphaVantageFunction.TIME_SERIES_MONTHLY, symbol, cancellationToken);
 
     /// <summary>
     /// Retrieves weekly time series data for the specified stock symbol.
@@ -49,42 +51,46 @@ public static class AlphaVantageClientExtensions
     /// <param name="client">The Alpha Vantage client instance.</param>
     /// <param name="symbol">The stock symbol to retrieve weekly time series data for.</param>
     /// <param name="adjusted">If true, returns adjusted weekly data; otherwise, returns unadjusted weekly data. Default is false.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task{JsonDocument}"/> containing the weekly time series data.</returns>
-    public static async Task<JsonDocument> TimeSeriesWeeklyJsonAsync(this IAlphaVantageClient client, string symbol, bool adjusted = false)
-        => await client.GetJsonDocumentAsync(adjusted ? AlphaVantageFunction.TIME_SERIES_WEEKLY_ADJUSTED : AlphaVantageFunction.TIME_SERIES_WEEKLY, symbol);
+    public static async Task<JsonDocument> TimeSeriesWeeklyJsonAsync(this IAlphaVantageClient client, string symbol, bool adjusted = false, CancellationToken cancellationToken = default)
+        => await client.GetJsonDocumentAsync(adjusted ? AlphaVantageFunction.TIME_SERIES_WEEKLY_ADJUSTED : AlphaVantageFunction.TIME_SERIES_WEEKLY, symbol, cancellationToken);
 
     /// <summary>
     /// Retrieves the latest global quote information for the specified stock symbol.
     /// </summary>
     /// <param name="client">The Alpha Vantage client instance.</param>
     /// <param name="symbol">The stock symbol to retrieve the global quote for.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task{JsonDocument}"/> containing the global quote data including price, volume, and trading information.</returns>
-    public static async Task<JsonDocument> GlobalQuoteJsonAsync(this IAlphaVantageClient client, string symbol)
-        => await client.GetJsonDocumentAsync(AlphaVantageFunction.GLOBAL_QUOTE, symbol);
+    public static async Task<JsonDocument> GlobalQuoteJsonAsync(this IAlphaVantageClient client, string symbol, CancellationToken cancellationToken = default)
+        => await client.GetJsonDocumentAsync(AlphaVantageFunction.GLOBAL_QUOTE, symbol, cancellationToken);
 
     /// <summary>
     /// Searches for stock symbols matching the specified keywords.
     /// </summary>
     /// <param name="client">The Alpha Vantage client instance.</param>
     /// <param name="symbol">The search keywords to find matching stock symbols.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task{JsonDocument}"/> containing the symbol search results with matching stock symbols and company information.</returns>
-    public static async Task<JsonDocument> SymbolSearchJsonAsync(this IAlphaVantageClient client, string symbol)
-        => await client.GetJsonDocumentAsync(AlphaVantageFunction.SYMBOL_SEARCH, symbol);
+    public static async Task<JsonDocument> SymbolSearchJsonAsync(this IAlphaVantageClient client, string symbol, CancellationToken cancellationToken = default)
+        => await client.GetJsonDocumentAsync(AlphaVantageFunction.SYMBOL_SEARCH, symbol, cancellationToken);
 
     /// <summary>
     /// Retrieves and parses the global quote data for the specified stock symbol into a strongly-typed response.
     /// </summary>
     /// <param name="client">The Alpha Vantage client instance.</param>
     /// <param name="symbol">The stock symbol to retrieve the global quote for.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task{AlphaVantageResponse}"/> containing either the parsed <see cref="GetGlobalQuoteAsync"/> data or error information.</returns>
     /// <remarks>
     /// This method calls the Alpha Vantage Global Quote API and parses the JSON response into a strongly-typed
     /// <see cref="GetGlobalQuoteAsync"/> object. If the API returns an error or the data cannot be parsed, the response
     /// will contain an error message in the <see cref="AlphaVantageResponse{T}.ErrorMessage"/> property.
     /// </remarks>
-    public static async Task<AlphaVantageResponse<GlobalQuote>> GetGlobalQuoteAsync(this IAlphaVantageClient client, string symbol)
+    public static async Task<AlphaVantageResponse<GlobalQuote>> GetGlobalQuoteAsync(this IAlphaVantageClient client, string symbol, CancellationToken cancellationToken = default)
     {
-        var jsonDocument = await client.GlobalQuoteJsonAsync(symbol);
+        using var jsonDocument = await client.GlobalQuoteJsonAsync(symbol, cancellationToken);
         var result = GlobalQuoteParser.FromDocument(jsonDocument, symbol);
         return new AlphaVantageResponse<GlobalQuote>
         {
@@ -98,6 +104,7 @@ public static class AlphaVantageClientExtensions
     /// </summary>
     /// <param name="client">The Alpha Vantage client instance.</param>
     /// <param name="symbols">An enumerable collection of stock symbols to retrieve global quotes for.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task{IDictionary}"/> containing a dictionary where keys are stock symbols and values are the corresponding <see cref="AlphaVantageResponse{GlobalQuote}"/> data.</returns>
     /// <remarks>
     /// This method executes multiple API calls concurrently to fetch global quote data for all provided symbols.
@@ -105,10 +112,10 @@ public static class AlphaVantageClientExtensions
     /// allowing individual error handling per symbol. Failed requests will have error information in their respective
     /// <see cref="AlphaVantageResponse{T}.ErrorMessage"/> property.
     /// </remarks>
-    public static async Task<IDictionary<string, AlphaVantageResponse<GlobalQuote>>> GetGlobalQuotesAsync(this IAlphaVantageClient client, IEnumerable<string> symbols)
+    public static async Task<IDictionary<string, AlphaVantageResponse<GlobalQuote>>> GetGlobalQuotesAsync(this IAlphaVantageClient client, IEnumerable<string> symbols, CancellationToken cancellationToken = default)
     {
         var symbolsList = symbols.ToList();
-        var tasks = symbolsList.Select(symbol => client.GetGlobalQuoteAsync(symbol));
+        var tasks = symbolsList.Select(symbol => client.GetGlobalQuoteAsync(symbol, cancellationToken));
         var results = await Task.WhenAll(tasks);
         return symbolsList.Zip(results, (symbol, result) => new { symbol, result })
             .ToDictionary(x => x.symbol, x => x.result);
@@ -119,6 +126,7 @@ public static class AlphaVantageClientExtensions
     /// </summary>
     /// <param name="client">The Alpha Vantage client instance.</param>
     /// <param name="symbol">The stock symbol to retrieve daily time series data for.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task{AlphaVantageResponse}"/> containing either the parsed <see cref="TimeSeries"/> data with daily interval or error information.</returns>
     /// <remarks>
     /// This method calls the Alpha Vantage Daily Time Series API and parses the JSON response into a strongly-typed
@@ -126,8 +134,8 @@ public static class AlphaVantageClientExtensions
     /// returns an error or the data cannot be parsed, the response will contain an error message in the
     /// <see cref="AlphaVantageResponse{T}.ErrorMessage"/> property.
     /// </remarks>
-    public static async Task<AlphaVantageResponse<TimeSeries>> GetDailyTimeSeriesAsync(this IAlphaVantageClient client, string symbol)
-        => TimeSeriesResult(await client.TimeSeriesDailyJsonAsync(symbol), symbol, TimeSeries.TimeSeriesInterval.Daily);
+    public static async Task<AlphaVantageResponse<TimeSeries>> GetDailyTimeSeriesAsync(this IAlphaVantageClient client, string symbol, CancellationToken cancellationToken = default)
+        => TimeSeriesResult(await client.TimeSeriesDailyJsonAsync(symbol, cancellationToken), symbol, TimeSeries.TimeSeriesInterval.Daily);
 
     /// <summary>
     /// Retrieves and parses weekly time series data for the specified stock symbol into a strongly-typed response.
@@ -135,6 +143,7 @@ public static class AlphaVantageClientExtensions
     /// <param name="client">The Alpha Vantage client instance.</param>
     /// <param name="symbol">The stock symbol to retrieve weekly time series data for.</param>
     /// <param name="adjusted">If true, returns adjusted weekly data that accounts for stock splits and dividends; otherwise, returns unadjusted weekly data. Default is false.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task{AlphaVantageResponse}"/> containing either the parsed <see cref="TimeSeries"/> data with weekly interval or error information.</returns>
     /// <remarks>
     /// This method calls the Alpha Vantage Weekly Time Series API and parses the JSON response into a strongly-typed
@@ -142,8 +151,8 @@ public static class AlphaVantageClientExtensions
     /// returns an error or the data cannot be parsed, the response will contain an error message in the
     /// <see cref="AlphaVantageResponse{T}.ErrorMessage"/> property.
     /// </remarks>
-    public static async Task<AlphaVantageResponse<TimeSeries>> GetWeeklyTimeSeriesAsync(this IAlphaVantageClient client, string symbol, bool adjusted = false)
-        => TimeSeriesResult(await client.TimeSeriesWeeklyJsonAsync(symbol, adjusted), symbol, TimeSeries.TimeSeriesInterval.Weekly);
+    public static async Task<AlphaVantageResponse<TimeSeries>> GetWeeklyTimeSeriesAsync(this IAlphaVantageClient client, string symbol, bool adjusted = false, CancellationToken cancellationToken = default)
+        => TimeSeriesResult(await client.TimeSeriesWeeklyJsonAsync(symbol, adjusted, cancellationToken), symbol, TimeSeries.TimeSeriesInterval.Weekly);
 
     /// <summary>
     /// Retrieves and parses monthly time series data for the specified stock symbol into a strongly-typed response.
@@ -151,6 +160,7 @@ public static class AlphaVantageClientExtensions
     /// <param name="client">The Alpha Vantage client instance.</param>
     /// <param name="symbol">The stock symbol to retrieve monthly time series data for.</param>
     /// <param name="adjusted">If true, returns adjusted monthly data that accounts for stock splits and dividends; otherwise, returns unadjusted monthly data. Default is false.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task{AlphaVantageResponse}"/> containing either the parsed <see cref="TimeSeries"/> data with monthly interval or error information.</returns>
     /// <remarks>
     /// This method calls the Alpha Vantage Monthly Time Series API and parses the JSON response into a strongly-typed
@@ -158,8 +168,8 @@ public static class AlphaVantageClientExtensions
     /// returns an error or the data cannot be parsed, the response will contain an error message in the
     /// <see cref="AlphaVantageResponse{T}.ErrorMessage"/> property.
     /// </remarks>
-    public static async Task<AlphaVantageResponse<TimeSeries>> GetMonthlyTimeSeriesAsync(this IAlphaVantageClient client, string symbol, bool adjusted = false)
-        => TimeSeriesResult(await client.TimeSeriesMonthlyJsonAsync(symbol, adjusted), symbol, TimeSeries.TimeSeriesInterval.Monthly);
+    public static async Task<AlphaVantageResponse<TimeSeries>> GetMonthlyTimeSeriesAsync(this IAlphaVantageClient client, string symbol, bool adjusted = false, CancellationToken cancellationToken = default)
+        => TimeSeriesResult(await client.TimeSeriesMonthlyJsonAsync(symbol, adjusted, cancellationToken), symbol, TimeSeries.TimeSeriesInterval.Monthly);
 
     /// <summary>
     /// Searches for financial symbols that match the specified keywords using the Alpha Vantage API.
@@ -173,15 +183,17 @@ public static class AlphaVantageClientExtensions
     /// results. Defaults to <see cref="SymbolMatch.MatchTypes.Any"/>.</param>
     /// <param name="region">The region to filter symbol search results by. Specifies the geographic area for the search. Defaults to <see
     /// cref="SymbolMatch.Regions.Any"/>.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains an <see
     /// cref="AlphaVantageResponse{SymbolMatches}"/> with the matching symbols, or an error message if no results are
     /// found.</returns>
     public static async Task<AlphaVantageResponse<SymbolMatches>> SymbolSearchAsync(this IAlphaVantageClient client,
         string keywords,
         SymbolMatch.MatchTypes matchType = SymbolMatch.MatchTypes.Any,
-        SymbolMatch.Regions region = SymbolMatch.Regions.Any)
+        SymbolMatch.Regions region = SymbolMatch.Regions.Any,
+        CancellationToken cancellationToken = default)
     {
-        var jsonDocument = await client.SymbolSearchJsonAsync(keywords);
+        using var jsonDocument = await client.SymbolSearchJsonAsync(keywords, cancellationToken);
         var result = SymbolMatchesParser.FromDocument(jsonDocument, keywords, matchType, region);
         return new AlphaVantageResponse<SymbolMatches>
         {

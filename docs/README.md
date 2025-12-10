@@ -1,5 +1,5 @@
-# Tudormobile AlphaVanatageAPI
-**Tudormobile.AlphaVanatageAPI** provides a lightweight library to access the Alpha Vantage API.  
+# Tudormobile AlphaVantageAPI
+**Tudormobile.AlphaVantageAPI** provides a lightweight library to access the Alpha Vantage API.  
 
 [Source Code](https://github.com/tudormobile/AlphaVantageAPI) | [Documentation](https://tudormobile.github.io/AlphaVantageAPI/) | [API documentation](https://tudormobile.github.io/AlphaVantageAPI/api/Tudormobile.html)
 ## Getting Started
