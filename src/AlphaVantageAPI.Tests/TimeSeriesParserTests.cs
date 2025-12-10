@@ -66,7 +66,7 @@ public class TimeSeriesParserTests
     }
 }";
 
-    string jsonMonthly = @"
+    readonly string jsonMonthly = @"
 {
     ""Meta Data"": {
         ""1. Information"": ""Monthly Prices (open, high, low, close) and Volumes"",
