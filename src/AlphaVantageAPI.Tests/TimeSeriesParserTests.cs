@@ -231,7 +231,7 @@ public class TimeSeriesParserTests
         var document = JsonDocument.Parse(badJson);
         var timeSeries = TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
         Assert.IsNotNull(timeSeries);
-        Assert.AreEqual(1, timeSeries.Data!.Count);
+        Assert.HasCount(1, timeSeries.Data);
         var entry = timeSeries.Data!.First();
         Assert.AreEqual(new DateOnly(2025, 12, 8), entry.Key);
         Assert.AreEqual(0m, entry.Value.Open);

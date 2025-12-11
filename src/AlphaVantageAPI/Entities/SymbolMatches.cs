@@ -7,7 +7,7 @@
 /// This class encapsulates both the original search keywords and the list of matching symbols found,
 /// providing a complete response for symbol search operations.
 /// </remarks>
-public class SymbolMatches
+public class SymbolMatches : IEntity
 {
     /// <summary>
     /// Gets the search keywords used to find matching symbols.

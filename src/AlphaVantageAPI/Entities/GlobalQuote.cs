@@ -4,7 +4,7 @@
 /// Represents a global quote for a stock symbol containing current market data and trading information.
 /// This class encapsulates real-time or latest available trading data for a security.
 /// </summary>
-public class GlobalQuote
+public class GlobalQuote : IEntity
 {
     /// <summary>
     /// Gets the stock symbol or ticker for this quote.

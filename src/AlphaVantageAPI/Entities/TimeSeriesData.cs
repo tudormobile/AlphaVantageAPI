@@ -8,7 +8,7 @@
 /// used in financial analysis and charting. All price values are represented as decimals for precision,
 /// while volume is represented as a long integer to accommodate large trading volumes.
 /// </remarks>
-public class TimeSeriesData
+public class TimeSeriesData : IEntity
 {
     /// <summary>
     /// Gets the opening price for the time period.

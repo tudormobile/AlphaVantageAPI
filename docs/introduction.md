@@ -9,8 +9,9 @@ This namespace contains the basic building blocks for accessing the Alpha Vantag
 
 The basic model consists of a lightweight wrapper around the Alpha Vantage web services. Use the *AlphaVantageClient* to retrieve either *JsonDocument* or *JsonString* from the service. You must provide your *apikey* to the constructor. All methods are asynchronous.
 ```cs
-var apiKey = "demo"; // Alpha Vantage provides a demo API key for testing
-var client = new AlphaVantageClient(apiKey);
+var apiKey = "demo";                // demo API key for testing
+var httpClient = new HttpClient();  // Http client to use
+var client = new AlphaVantageClient(apiKey, httpClient);
 var function = AlphaVantageFunction.GLOBAL_QUOTE;
 var symbol = "IBM";
 
@@ -23,11 +24,14 @@ var jsonDocument = await client.GetJsonDocumentAsync(function, symbol);
 
 The basic model makes no attempt to modify or extend the AlphaVantage api in any way and serves only as a lightweight wrapper to make it slightly easier to consume Json data from the service in the c# language. All responses, including error responses, are passed through unchanged. See the Alpha Vantage API documentation for a complete description.
 
+HttpClient management is the responsibility of the host application.
+
 ### Tudormobile.AlphaVantage.Extensions
 The extensibility model provides the building blocks for an extensible implementation, including interfaces for the *IAlphaVantageClient*, a builder pattern, and additional methods that match the function being called (e.g., *GlobalQuote*) rather than providing a function argument to the low-level calls. 
 ```cs
 var client = AlphaVantageClient.GetBuilder()
             .WithApiKey("demo")
+            .WithHttpClient(new HttpClient())
             .Build();
 var jsonDocument = await client.GlobalQuoteJsonAsync("IBM");
 ```
@@ -35,6 +39,7 @@ The extensibility model also goes further to provide an object model for Alpha V
 ```cs
 var client = AlphaVantageClient.GetBuilder()
             .WithApiKey("demo")
+            .WithHttpClient(new HttpClient())
             .Build();
 
 AlphaVantageResponse<GlobalQuote> response = await client.GetGlobalQuoteAsync("IBM");
@@ -50,10 +55,22 @@ else
 ```
 Some calls can be aggregated to provide additional functionality from the api as well.
 ```cs
-var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").Build();
+var client = AlphaVantageClient.GetBuilder()
+    .WithApiKey("demo")
+    .WithHttpClient(new HttpClient())
+    .Build();
 var data = await client.GetGlobalQuotesAsync(["IBM", "APPL", "MSFT"]);
 
 // data is an IDictionary<String, AlphaVantageResponse<GlobalQuote>>
+```
+
+### Dependency Injection
+The AlphaVanatageAPI library takes advanatage of the dotnet dependency injection model, extending the IServiceCollection to provide an implementation of IAlphaVantageClient that can be added to the collection using *AddAlphaVantageClient()* extension method.
+```cs
+HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+
+builder.Services.AddHttpClient();           // required for AlphaVantageClient to use
+builder.Services.AddAlphaVantageClient(options => options.ApiKey = "your-api-key");
 ```
 
 > [!NOTE]

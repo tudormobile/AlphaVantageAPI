@@ -7,7 +7,7 @@
 /// This class contains detailed information about a financial instrument that matches the search criteria,
 /// including trading hours, location, and match relevance score.
 /// </remarks>
-public class SymbolMatch
+public class SymbolMatch : IEntity
 {
     /// <summary>
     /// Gets the stock symbol or ticker for this match.
