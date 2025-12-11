@@ -64,8 +64,8 @@ var data = await client.GetGlobalQuotesAsync(["IBM", "APPL", "MSFT"]);
 // data is an IDictionary<String, AlphaVantageResponse<GlobalQuote>>
 ```
 
-### Dependency Injects
-The AlphaVanatageAPI library takes advanatage of the dotnet dependency inject model, extending the IServiceCollection to provide an implementation of IAlphaVantageClient that can be added to the collection using *AddAlphaVantageClient()* extension method.
+### Dependency Injection
+The AlphaVanatageAPI library takes advanatage of the dotnet dependency injection model, extending the IServiceCollection to provide an implementation of IAlphaVantageClient that can be added to the collection using *AddAlphaVantageClient()* extension method.
 ```cs
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
