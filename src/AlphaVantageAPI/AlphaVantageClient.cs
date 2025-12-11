@@ -32,7 +32,7 @@ public class AlphaVantageClient : IAlphaVantageClient
         _apiKey = apiKey;
         _logger = logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance;
         _httpClient = client ?? throw new ArgumentNullException(nameof(client));
-        _logger.LogInformation("AlphaVantageClient initialized.");
+        _logger.LogDebug("AlphaVantageClient initialized.");
     }
 
     /// <summary>
