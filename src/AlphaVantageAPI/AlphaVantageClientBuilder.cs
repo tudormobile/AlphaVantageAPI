@@ -1,8 +1,12 @@
-﻿namespace Tudormobile.AlphaVantage;
+﻿using Microsoft.Extensions.Logging;
+
+namespace Tudormobile.AlphaVantage;
 
 internal class AlphaVantageClientBuilder : IAlphaVantageClientBuilder
 {
     private string _apiKey = string.Empty;
+    private HttpClient? _httpClient;
+    private ILogger? _logger;
 
     public IAlphaVantageClient Build()
     {
@@ -10,7 +14,11 @@ internal class AlphaVantageClientBuilder : IAlphaVantageClientBuilder
         {
             throw new InvalidOperationException("API key must be set before building the client. Use WithApiKey() to set the API key.");
         }
-        return new AlphaVantageClient(_apiKey);
+        if (_httpClient == null)
+        {
+            throw new InvalidOperationException("An HttpClient instance must be provided. Use WithHttpClient() to indicate what client instance to use.");
+        }
+        return new AlphaVantageClient(_apiKey, _httpClient, _logger);
     }
 
     public IAlphaVantageClientBuilder WithApiKey(string apiKey)
@@ -18,4 +26,17 @@ internal class AlphaVantageClientBuilder : IAlphaVantageClientBuilder
         _apiKey = apiKey;
         return this;
     }
+
+    public IAlphaVantageClientBuilder WithHttpClient(HttpClient client)
+    {
+        _httpClient = client;
+        return this;
+    }
+
+    public IAlphaVantageClientBuilder AddLogging(ILogger logger)
+    {
+        _logger = logger;
+        return this;
+    }
+
 }

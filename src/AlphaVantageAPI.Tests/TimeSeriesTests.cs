@@ -10,10 +10,10 @@ public class TimeSeriesTests
     {
         var timeSeries = new TimeSeries();
         Assert.AreEqual(string.Empty, timeSeries.Symbol);
-        Assert.AreEqual(default(DateOnly), timeSeries.LastUpdated);
+        Assert.AreEqual(default, timeSeries.LastUpdated);
         Assert.AreEqual(TimeSeries.TimeSeriesInterval.OneMin, timeSeries.Interval);
         Assert.IsNotNull(timeSeries.Data);
-        Assert.IsTrue(timeSeries.Data.Count == 0);
+        Assert.IsEmpty(timeSeries.Data);
     }
 
 }

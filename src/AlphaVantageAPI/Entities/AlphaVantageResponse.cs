@@ -12,14 +12,14 @@ public class AlphaVantageResponse<T> where T : class
     /// This will be null or empty for successful API calls.
     /// </summary>
     /// <value>A string containing the error message, or null if the call was successful.</value>
-    public string? ErrorMessage { get; set; }
+    public string? ErrorMessage { get; init; }
 
     /// <summary>
     /// Gets or sets the result data from the API call.
     /// This will be null if the API call failed or returned no data.
     /// </summary>
     /// <value>An instance of type T containing the API response data, or null if unsuccessful.</value>
-    public T? Result { get; set; }
+    public T? Result { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether the API call was successful.

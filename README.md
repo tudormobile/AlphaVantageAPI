@@ -17,7 +17,8 @@ A lightweight library to access the Apha Vantage API.
 using Tudormobile.AlphaVantage;
 
 var apiKey = "demo";    // your api key
-var client = new AlphaVantageClient(apiKey);
+var httpClient = new HttpClient();
+var client = new AlphaVantageClient(apiKey, httpClient);
 var function = AlphaVantageFunction.GLOBAL_QUOTE;
 var symbol = "IBM";
 // utf8json string...
@@ -31,8 +32,10 @@ using Tudormobile.AlphaVantageA;
 using Tudormobile.AlphaVantage.Extensions;
 
 var apiKey = "demo";    // your api key
+var httpClient = new HttpClient();
 var client = AlphaVantageClient.GetBuilder()
              .WithApiKey(apiKey)
+             .WithHttpClient(httpClient)
              .Build();
 var symbol = "IBM";
 var json = client.GlobalQuote(symbol);

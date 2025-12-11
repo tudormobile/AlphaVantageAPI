@@ -4,7 +4,8 @@
 ```bash
 dotnet add package Tudormobile.AlphaVantageAPI
 ```
-No dependencies or prerequisites.
+### Dependencies
+Microsoft.Extensions.Logging
 
 ### Inlcuding library provided services
 ```cs

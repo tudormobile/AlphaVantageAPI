@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using Microsoft.Extensions.Logging;
+using System.Diagnostics;
+using System.Text.Json;
 
 namespace Tudormobile.AlphaVantage;
 
@@ -12,19 +14,25 @@ namespace Tudormobile.AlphaVantage;
 public class AlphaVantageClient : IAlphaVantageClient
 {
     private readonly string _apiKey;
-    private static readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
+    private readonly ILogger _logger;
+    private readonly HttpClient _httpClient;
 
     /// <summary>
     /// Initializes a new instance of the AlphaVantageClient class using the specified API key.
     /// </summary>
     /// <param name="apiKey">The API key used to authenticate requests to the Alpha Vantage service. Cannot be null or empty.</param>
-    public AlphaVantageClient(string apiKey)
+    /// <param name="client">The HttpClient instance used to make HTTP requests to the Alpha Vantage API.</param>
+    /// <param name="logger">Optional logger instance for logging diagnostic information. If null, a NullLogger will be used.</param>
+    public AlphaVantageClient(string apiKey, HttpClient client, ILogger? logger = null)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
         {
             throw new ArgumentException("API key cannot be null or empty.", nameof(apiKey));
         }
         _apiKey = apiKey;
+        _logger = logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance;
+        _httpClient = client ?? throw new ArgumentNullException(nameof(client));
+        _logger.LogInformation("AlphaVantageClient initialized.");
     }
 
     /// <summary>
@@ -39,8 +47,25 @@ public class AlphaVantageClient : IAlphaVantageClient
         string symbol,
         CancellationToken cancellationToken = default)
     {
-        using var reader = new StreamReader(await GetStreamAsync(function, symbol, cancellationToken).ConfigureAwait(false));
-        return await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+        if (string.IsNullOrWhiteSpace(symbol))
+        {
+            throw new ArgumentException("Symbol cannot be null or empty.", nameof(symbol));
+        }
+
+        _logger.LogDebug("Requesting json data {Function} for {Symbol}", function, symbol);
+        try
+        {
+            var stopwatch = Stopwatch.StartNew();
+            using var reader = new StreamReader(await GetStreamAsync(function, symbol, cancellationToken).ConfigureAwait(false));
+            var result = await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+            _logger.LogInformation("Successfully fetched {Function} json data for {Symbol} in {ElapsedMs}ms", function, symbol, stopwatch.ElapsedMilliseconds);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching {Function} for {Symbol}", function, symbol);
+            throw;
+        }
     }
 
     /// <summary>
@@ -56,8 +81,25 @@ public class AlphaVantageClient : IAlphaVantageClient
         string symbol,
         CancellationToken cancellationToken = default)
     {
-        using var stream = await GetStreamAsync(function, symbol, cancellationToken).ConfigureAwait(false);
-        return await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
+        if (string.IsNullOrWhiteSpace(symbol))
+        {
+            throw new ArgumentException("Symbol cannot be null or empty.", nameof(symbol));
+        }
+
+        _logger.LogDebug("Requesting JsonDocument {Function} for {Symbol}", function, symbol);
+        try
+        {
+            var stopwatch = Stopwatch.StartNew();
+            using var stream = await GetStreamAsync(function, symbol, cancellationToken).ConfigureAwait(false);
+            var result = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
+            _logger.LogInformation("Successfully fetched {Function} data for {Symbol} in {ElapsedMs}ms", function, symbol, stopwatch.ElapsedMilliseconds);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching {Function} for {Symbol}", function, symbol);
+            throw;
+        }
     }
 
     private async Task<Stream> GetStreamAsync(
@@ -70,8 +112,39 @@ public class AlphaVantageClient : IAlphaVantageClient
             : $"&symbol={Uri.EscapeDataString(symbolOrKeywords)}";
         var url = $"https://www.alphavantage.co/query?function={function}{symOrKey}&apikey={Uri.EscapeDataString(_apiKey)}";
         var response = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        {
+            response?.Dispose();
+            _logger.LogWarning("Rate limit hit for {Function} - {Symbol}", function, symbolOrKeywords);
+            throw new AlphaVantageException(
+                "Rate limit exceeded. Please wait before making more requests. " +
+                "Consider implementing rate limiting in your application.", ex);
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            response?.Dispose();
+            throw new AlphaVantageException("Invalid API key", ex);
+        }
+        catch (HttpRequestException ex)
+        {
+            response?.Dispose();
+            throw new AlphaVantageException($"Failed to fetch function '{function}' for symbolOrKeywords '{symbolOrKeywords}': {ex.Message}", ex);
+        }
+        catch (OperationCanceledException ex)
+        {
+            response?.Dispose();
+            throw new AlphaVantageException($"Operation Cancelled; function '{function}' for symbolOrKeywords '{symbolOrKeywords}': {ex.Message}", ex);
+        }
+        catch
+        {
+            response?.Dispose();
+            throw;
+        }
     }
 }
 

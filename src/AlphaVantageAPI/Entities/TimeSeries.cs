@@ -9,7 +9,7 @@
 /// time intervals from intraday (1-minute) to long-term (monthly) data. The data is stored as a dictionary
 /// keyed by date for efficient lookup and retrieval.
 /// </remarks>
-public class TimeSeries
+public class TimeSeries : IEntity
 {
     /// <summary>
     /// Gets the stock symbol or ticker for this quote.
