@@ -70,7 +70,7 @@ The AlphaVanatageAPI library takes advanatage of the dotnet dependency injection
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddHttpClient();           // required for AlphaVantageClient to use
-builder.Services.AddAlphaVantageClient();
+builder.Services.AddAlphaVantageClient(options => options.ApiKey = "your-api-key");
 ```
 
 > [!NOTE]
