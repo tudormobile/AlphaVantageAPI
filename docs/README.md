@@ -12,5 +12,6 @@ dotnet add package Tudormobile.AlphaVantageAPI
 
 ### Dependencies
 Microsoft.Extensions.Logging
+Microsoft.Extensions.Http
 
 **Tudormobile.AlphaVantageAPI** is released as open source under the MIT license. Bug reports and contributions can be made at [the GitHub repository](https://github.com/tudormobile/AlphaVantageAPI).

@@ -5,7 +5,7 @@
 /// Provides a standardized way to handle both successful responses and error conditions.
 /// </summary>
 /// <typeparam name="T">The type of the data returned by the API call. Must be a reference type.</typeparam>
-public class AlphaVantageResponse<T> where T : class
+public class AlphaVantageResponse<T> where T : IEntity
 {
     /// <summary>
     /// Gets or sets the error message if the API call failed.

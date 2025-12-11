@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/ExtendedConsoleApp/ExtendedConsoleApp.csproj" Id="cbf66748-b010-4633-8380-a17a3ed644c6" />
+    <Project Path="samples/SimpleConsoleApp/SimpleConsoleApp.csproj" Id="8bc137b3-3fb8-436d-be63-5a43f5c77c00" />
+  </Folder>
   <Project Path="src/AlphaVantageAPI.Tests/AlphaVantageAPI.Tests.csproj" Id="ee263615-1833-448a-aef0-e91121fe972d" />
   <Project Path="src/AlphaVantageAPI/AlphaVantageAPI.csproj" Id="eb5792df-699e-4374-bf8f-5f7e10127eac" />
 </Solution>

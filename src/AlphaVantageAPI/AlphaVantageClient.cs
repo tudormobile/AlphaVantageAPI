@@ -36,6 +36,16 @@ public class AlphaVantageClient : IAlphaVantageClient
     }
 
     /// <summary>
+    /// Initializes a new instance of the AlphaVantageClient class using the specified HTTP client factory, API key, and
+    /// logger.
+    /// </summary>
+    /// <param name="httpClientFactory">The factory used to create HTTP client instances for sending requests to the Alpha Vantage API. Cannot be null.</param>
+    /// <param name="apiKey">The API key used to authenticate requests to the Alpha Vantage service. Cannot be null or empty.</param>
+    /// <param name="logger">The logger used to record diagnostic and operational information for the AlphaVantageClient. Cannot be null.</param>
+    public AlphaVantageClient(IHttpClientFactory httpClientFactory, string apiKey, ILogger<AlphaVantageClient> logger)
+        : this(apiKey, httpClientFactory.CreateClient(nameof(AlphaVantageClient)), logger) { }
+
+    /// <summary>
     /// Asynchronously retrieves the raw JSON response from the Alpha Vantage API for the specified function and symbol.
     /// </summary>
     /// <param name="function">The Alpha Vantage function to query. Determines the type of data returned by the API.</param>
@@ -120,7 +130,8 @@ public class AlphaVantageClient : IAlphaVantageClient
         catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
         {
             response?.Dispose();
-            _logger.LogWarning("Rate limit hit for {Function} - {Symbol}", function, symbolOrKeywords);
+            var label = function == AlphaVantageFunction.SYMBOL_SEARCH ? "keywords" : "symbol";
+            _logger.LogWarning("Rate limit hit for {Function} - {Label}: {Value}", function, label, symbolOrKeywords);
             throw new AlphaVantageException(
                 "Rate limit exceeded. Please wait before making more requests. " +
                 "Consider implementing rate limiting in your application.", ex);
@@ -133,12 +144,14 @@ public class AlphaVantageClient : IAlphaVantageClient
         catch (HttpRequestException ex)
         {
             response?.Dispose();
-            throw new AlphaVantageException($"Failed to fetch function '{function}' for symbolOrKeywords '{symbolOrKeywords}': {ex.Message}", ex);
+            var label = function == AlphaVantageFunction.SYMBOL_SEARCH ? "keywords" : "symbol";
+            throw new AlphaVantageException($"Failed to fetch function '{function}' for {label} '{symbolOrKeywords}': {ex.Message}", ex);
         }
         catch (OperationCanceledException ex)
         {
             response?.Dispose();
-            throw new AlphaVantageException($"Operation Cancelled; function '{function}' for symbolOrKeywords '{symbolOrKeywords}': {ex.Message}", ex);
+            var label = function == AlphaVantageFunction.SYMBOL_SEARCH ? "keywords" : "symbol";
+            throw new AlphaVantageException($"Operation Cancelled; function '{function}' for {label} '{symbolOrKeywords}': {ex.Message}", ex);
         }
         catch
         {

@@ -65,7 +65,7 @@ var data = await client.GetGlobalQuotesAsync(["IBM", "APPL", "MSFT"]);
 ```
 
 ### Dependency Injection
-The AlphaVanatageAPI library takes advanatage of the dotnet dependency injection model, extending the IServiceCollection to provide an implementation of IAlphaVantageClient that can be added to the collection using *AddAlphaVantageClient()* extension method.
+The AlphaVantageAPI library takes advantage of the dotnet dependency injection model, extending the IServiceCollection to provide an implementation of IAlphaVantageClient that can be added to the collection using *AddAlphaVantageClient()* extension method.
 ```cs
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
@@ -75,3 +75,10 @@ builder.Services.AddAlphaVantageClient(options => options.ApiKey = "your-api-key
 
 > [!NOTE]
 > Only the free tier api calls are currently implemented.
+
+### Sample Code
+Some simple code samples are provided in the *samples/* folder. 
+- SimpleConsoleApp
+    - A console application using the simple AlphaVantageClient (no extensions).
+- ExtendedConsoleApp
+    - A console application using the entity object model provided by the library as well as Microsoft's dependency injection, logging, and application host extensions.

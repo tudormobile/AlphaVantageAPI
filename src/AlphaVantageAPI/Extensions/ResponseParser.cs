@@ -5,7 +5,7 @@ namespace Tudormobile.AlphaVantage.Extensions;
 
 internal class ResponseParser
 {
-    internal static AlphaVantageResponse<T> CreateResponse<T>(T? result, JsonDocument jsonDocument, string errorMessage = "Unknown error occurred.") where T : class, IEntity
+    internal static AlphaVantageResponse<T> CreateResponse<T>(T? result, JsonDocument jsonDocument, string errorMessage = "Unknown error occurred.") where T : IEntity
     {
         return new AlphaVantageResponse<T>
         {
