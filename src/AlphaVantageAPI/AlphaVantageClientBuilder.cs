@@ -8,6 +8,12 @@ internal class AlphaVantageClientBuilder : IAlphaVantageClientBuilder
     private HttpClient? _httpClient;
     private ILogger? _logger;
 
+    public string ApiKey
+    {
+        get => _apiKey;
+        set => _apiKey = value;
+    }
+
     public IAlphaVantageClient Build()
     {
         if (string.IsNullOrWhiteSpace(_apiKey))

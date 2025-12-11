@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 namespace Tudormobile.AlphaVantage.Extensions;
 
 /// <summary>
@@ -10,21 +11,41 @@ namespace Tudormobile.AlphaVantage.Extensions;
 public static class AlphaVantageServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds and configures an Alpha Vantage API client for dependency injection, enabling typed access to Alpha Vantage
-    /// financial data services within the application.
+    /// Adds AlphaVantage client services to the specified <see cref="IServiceCollection"/>.
     /// </summary>
-    /// <remarks>Registers the Alpha Vantage client as a typed HTTP client with a handler lifetime of five
-    /// minutes. This method should be called during application startup to ensure the client is available for injection
-    /// throughout the application's lifetime.</remarks>
-    /// <param name="services">The service collection to which the Alpha Vantage client and its dependencies will be added.</param>
-    /// <param name="configure">Configuration options, such as the ApiKey.</param>
-    /// <returns>The same service collection instance, allowing for method chaining.</returns>
+    /// <param name="services">The <see cref="IServiceCollection"/> to add services to.</param>
+    /// <param name="configure">The action used to configure the <see cref="IAlphaVantageClientBuilder"/>.</param>
+    /// <returns>The <see cref="IServiceCollection"/> so that additional calls can be chained.</returns>
     public static IServiceCollection AddAlphaVantageClient(
         this IServiceCollection services,
-    Action<AlphaVantageOptions> configure)
+        Action<IAlphaVantageClientBuilder> configure)
     {
-        services.Configure(configure);
-        services.AddHttpClient<IAlphaVantageClient, AlphaVantageClient>();
+        if (services == null)
+        {
+            throw new ArgumentNullException(nameof(services));
+        }
+        if (configure == null)
+        {
+            throw new ArgumentNullException(nameof(configure));
+        }
+
+        // Create a builder to capture configuration
+        var builder = new AlphaVantageClientBuilder();
+        configure(builder);
+
+        // Register HttpClient for AlphaVantageClient
+        services.AddHttpClient(nameof(AlphaVantageClient));
+
+        // Register IAlphaVantageClient with a factory that provides the API key
+        services.AddScoped<IAlphaVantageClient>(sp =>
+        {
+            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+            var logger = sp.GetRequiredService<ILogger<AlphaVantageClient>>();
+
+            // Use the captured API key from the builder
+            return new AlphaVantageClient(httpClientFactory, builder.ApiKey, logger);
+        });
+
         return services;
     }
 }

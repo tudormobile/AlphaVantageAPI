@@ -11,6 +11,11 @@ namespace Tudormobile.AlphaVantage;
 public interface IAlphaVantageClientBuilder : IBuilder<IAlphaVantageClient>
 {
     /// <summary>
+    /// Gets or sets the API key used to authenticate with the AlphaVantage service.
+    /// </summary>
+    string ApiKey { get; set; }
+
+    /// <summary>
     /// Sets the API key to be used for authenticating requests to the Alpha Vantage service.
     /// </summary>
     /// <param name="apiKey">The API key provided by Alpha Vantage. Cannot be null or empty.</param>

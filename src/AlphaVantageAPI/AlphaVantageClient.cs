@@ -35,7 +35,13 @@ public class AlphaVantageClient : IAlphaVantageClient
         _logger.LogDebug("AlphaVantageClient initialized.");
     }
 
-
+    /// <summary>
+    /// Initializes a new instance of the AlphaVantageClient class using the specified HTTP client factory, API key, and
+    /// logger.
+    /// </summary>
+    /// <param name="httpClientFactory">The factory used to create HTTP client instances for sending requests to the Alpha Vantage API. Cannot be null.</param>
+    /// <param name="apiKey">The API key used to authenticate requests to the Alpha Vantage service. Cannot be null or empty.</param>
+    /// <param name="logger">The logger used to record diagnostic and operational information for the AlphaVantageClient. Cannot be null.</param>
     public AlphaVantageClient(IHttpClientFactory httpClientFactory, string apiKey, ILogger<AlphaVantageClient> logger)
         : this(apiKey, httpClientFactory.CreateClient(nameof(AlphaVantageClient)), logger) { }
 
