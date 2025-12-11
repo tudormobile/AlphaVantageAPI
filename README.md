@@ -8,7 +8,7 @@ Copyright (C) 2025 Bill Tudor
 A lightweight library to access the Apha Vantage API.
 
 > [!NOTE]  
-> The current state is experimental (v0.X).
+> The current state is pre-production (v0.x).
 
 ### Quick Start
 

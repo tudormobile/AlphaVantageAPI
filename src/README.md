@@ -23,3 +23,6 @@ Building a release configuration will generate nuget package(s) in the respectiv
     - Unit tests
 - docs\docfx.json
     - Documentation
+- samples\
+    - **SimpleConsoleApp** - Simple console application
+    - **ExtendedConsoleApp** - Console application using extensibility model
