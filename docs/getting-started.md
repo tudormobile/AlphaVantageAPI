@@ -7,7 +7,7 @@ dotnet add package Tudormobile.AlphaVantageAPI
 ### Dependencies
 Microsoft.Extensions.Logging
 
-### Inlcuding library provided services
+### Including library provided services
 ```cs
 using Tudormobile.AlphaVantage;
 ```
