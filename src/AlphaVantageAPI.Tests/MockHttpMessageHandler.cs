@@ -18,19 +18,21 @@ public class MockHttpMessageHandler : HttpMessageHandler
             }";
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        if (request.RequestUri.Query.Contains("ABCDEFG"))
+        return await Task.Run(() =>
         {
-            var json = @"{
+            if (request.RequestUri.Query.Contains("ABCDEFG"))
+            {
+                var json = @"{
             ""Information"": ""The **demo** API key is for demo purposes only. Please claim your free API key at (https://www.alphavantage.co/support/#api-key) to explore our full API offerings. It takes fewer than 20 seconds.""
 }";
-            return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                {
+                    Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")
+                };
+            }
+            else if (request.RequestUri.Query.Contains("function=TIME_SERIES_DAILY"))
             {
-                Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")
-            };
-        }
-        else if (request.RequestUri.Query.Contains("function=TIME_SERIES_DAILY"))
-        {
-            var json = @"{
+                var json = @"{
                 ""Meta Data"": {
                     ""1. Information"": ""Daily Prices (open, high, low, close) and Volumes"",
                     ""2. Symbol"": ""IBM"",
@@ -48,15 +50,14 @@ public class MockHttpMessageHandler : HttpMessageHandler
                     }
                 }
             }";
-            return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                {
+                    Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")
+                };
+            }
+            else if (request.RequestUri.Query.Contains("function=TIME_SERIES_MONTHLY"))
             {
-                Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")
-            };
-
-        }
-        else if (request.RequestUri.Query.Contains("function=TIME_SERIES_MONTHLY"))
-        {
-            var json = @"{
+                var json = @"{
                 ""Meta Data"": {
                     ""1. Information"": ""Monthly Prices (open, high, low, close) and Volumes"",
                     ""2. Symbol"": ""IBM"",
@@ -73,15 +74,15 @@ public class MockHttpMessageHandler : HttpMessageHandler
                     }
                 }
             }";
+                return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                {
+                    Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")
+                };
+            }
             return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
-                Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")
+                Content = new StringContent(JsonResponse, System.Text.Encoding.UTF8, "application/json")
             };
-
-        }
-        return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
-        {
-            Content = new StringContent(JsonResponse, System.Text.Encoding.UTF8, "application/json")
-        };
+        });
     }
 }
