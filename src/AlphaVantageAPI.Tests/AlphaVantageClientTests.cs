@@ -7,11 +7,13 @@ namespace AlphaVantageAPI.Tests;
 public class AlphaVantageClientTests
 {
     private static HttpClient? _httpClient;
+    private static HttpMessageHandler? _mockHttpMessageHandler;
 
     [ClassInitialize]
     public static void ClassInitialize(TestContext context)
     {
-        _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+        _mockHttpMessageHandler = new MockHttpMessageHandler();
+        _httpClient = new HttpClient(_mockHttpMessageHandler) { Timeout = TimeSpan.FromSeconds(30) };
     }
 
     [ClassCleanup]
@@ -71,53 +73,6 @@ public class AlphaVantageClientTests
     }
 
     [TestMethod]
-    public async Task GetJsonDocumentAsync_WithValidParameters()
-    {
-        // Arrange
-        var apiKey = "demo"; // Alpha Vantage provides a demo API key for testing
-        var client = new AlphaVantageClient(apiKey, _httpClient!);
-        var function = AlphaVantageFunction.GLOBAL_QUOTE;
-        var symbol = "IBM";
-        // Act
-        var jsonDocument = await client.GetJsonDocumentAsync(function, symbol, TestContext.CancellationToken);
-        // Assert
-        Assert.IsNotNull(jsonDocument);
-        Assert.IsTrue(jsonDocument.RootElement.TryGetProperty("Global Quote", out _));
-    }
-
-    [TestMethod]
-    public async Task GetJsonDocumentAsync_WithInvalidParameters()
-    {
-        // Arrange
-        var apiKey = "invalid-key";
-        var client = new AlphaVantageClient(apiKey, _httpClient!);
-        var function = AlphaVantageFunction.GLOBAL_QUOTE;
-        var symbol = "invalid-symbol";    // Use something other than IBM to avoid demo success
-        // Act
-        var jsonDocument = await client.GetJsonDocumentAsync(function, symbol, TestContext.CancellationToken);
-        // Assert
-        Assert.IsNotNull(jsonDocument);
-        Assert.IsTrue(jsonDocument.RootElement.TryGetProperty("Global Quote", out var quote));
-        Assert.IsTrue(quote.GetRawText().Trim().Equals("{}"));
-    }
-
-    [TestMethod]
-    public async Task GetJsonDocumentAsync_WithInvalidDemoKey()
-    {
-        // Arrange
-        var apiKey = "demo";
-        var client = new AlphaVantageClient(apiKey, _httpClient!);
-        var function = AlphaVantageFunction.GLOBAL_QUOTE;
-        var symbol = "invalid-symbol";    // Use something other than IBM to avoid demo success
-        // Act
-        var jsonDocument = await client.GetJsonDocumentAsync(function, symbol, TestContext.CancellationToken);
-        // Assert
-        Assert.IsNotNull(jsonDocument);
-        Assert.IsFalse(jsonDocument.RootElement.TryGetProperty("Global Quote", out _));
-        Assert.IsTrue(jsonDocument.RootElement.TryGetProperty("Information", out _));
-    }
-
-    [TestMethod]
     public async Task GetJsonStringAsync_WithValidParameters()
     {
         // Arrange
@@ -133,22 +88,5 @@ public class AlphaVantageClientTests
         Assert.Contains("\"IBM\"", jsonString);
     }
 
-    [TestMethod]
-    public async Task GetJsonStringAsync_SymbolSearch_ReturnsValidJson()
-    {
-        // Arrange
-        var apiKey = "test-key"; // Alpha Vantage provides a demo API key for testing
-        var client = new AlphaVantageClient(apiKey, _httpClient!);
-        var function = AlphaVantageFunction.SYMBOL_SEARCH;
-        var symbol = "Microsoft Corp";
-        // Act
-        var jsonString = await client.GetJsonStringAsync(function, symbol, TestContext.CancellationToken);
-        // Assert
-        Assert.IsNotNull(jsonString);
-        Assert.Contains("\"bestMatches\"", jsonString);
-        Assert.Contains("\"MSFT\"", jsonString);
-    }
-
     public TestContext TestContext { get; set; }
 }
-

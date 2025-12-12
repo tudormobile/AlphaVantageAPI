@@ -9,11 +9,13 @@ namespace AlphaVantageAPI.Tests;
 public class AlphaVantageClientExtensionsTests
 {
     private static HttpClient? _httpClient;
+    private static HttpMessageHandler? _mockHttpMessageHandler;
 
     [ClassInitialize]
     public static void ClassInitialize(TestContext context)
     {
-        _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+        _mockHttpMessageHandler = new MockHttpMessageHandler();
+        _httpClient = new HttpClient(_mockHttpMessageHandler) { Timeout = TimeSpan.FromSeconds(30) };
     }
 
     [ClassCleanup]
@@ -46,7 +48,7 @@ public class AlphaVantageClientExtensionsTests
     }
 
     [TestMethod]
-    public async Task GlobalQuoteTest()
+    public async Task GlobalQuoteJsonAsyncTest()
     {
         var expected = JsonValueKind.Object;
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
@@ -56,7 +58,7 @@ public class AlphaVantageClientExtensionsTests
     }
 
     [TestMethod]
-    public async Task TimeSeriesDailyTest()
+    public async Task TimeSeriesDailyJsonAsyncTest()
     {
         var expected = JsonValueKind.Object;
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
@@ -66,7 +68,7 @@ public class AlphaVantageClientExtensionsTests
     }
 
     [TestMethod]
-    public async Task TimeSeriesMonthlyTest()
+    public async Task TimeSeriesMonthlyJsonAsyncTest()
     {
         var expected = JsonValueKind.Object;
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
@@ -76,7 +78,7 @@ public class AlphaVantageClientExtensionsTests
     }
 
     [TestMethod]
-    public async Task TimeSeriesMonthlyAdjustedTest()
+    public async Task TimeSeriesMonthlyAdjustedJsonAsyncTest()
     {
         var expected = JsonValueKind.Object;
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
@@ -86,7 +88,7 @@ public class AlphaVantageClientExtensionsTests
     }
 
     [TestMethod]
-    public async Task TimeSeriesWeeklyTest()
+    public async Task TimeSeriesWeeklyJsonAsyncTest()
     {
         var expected = JsonValueKind.Object;
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
@@ -96,7 +98,7 @@ public class AlphaVantageClientExtensionsTests
     }
 
     [TestMethod]
-    public async Task TimeSeriesWeeklyAdjustedTest()
+    public async Task TimeSeriesWeeklyAdjustedJsonAsyncTest()
     {
         var expected = JsonValueKind.Object;
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
@@ -106,7 +108,7 @@ public class AlphaVantageClientExtensionsTests
     }
 
     [TestMethod]
-    public async Task SymbolSearchTest()
+    public async Task SymbolSearchJsonAsyncTest()
     {
         var expected = JsonValueKind.Object;
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
@@ -116,7 +118,7 @@ public class AlphaVantageClientExtensionsTests
     }
 
     [TestMethod]
-    public async Task GlobalQuoteEntityTest()
+    public async Task GetGlobalQuoteAsyncTest()
     {
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
         var actual = await client.GetGlobalQuoteAsync("IBM", TestContext.CancellationToken);
@@ -125,7 +127,7 @@ public class AlphaVantageClientExtensionsTests
     }
 
     [TestMethod]
-    public async Task GlobalQuoteEntityTestWithError()
+    public async Task GetGlobalQuoteAsyncTestWithError()
     {
         // note: the demo API key only works with IBM symbol
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
@@ -136,7 +138,7 @@ public class AlphaVantageClientExtensionsTests
     }
 
     [TestMethod]
-    public async Task GlobalQuoteEntityTestWithMultipleSymbols()
+    public async Task GetGlobalQuotesAsyncTestWithMultipleSymbols()
     {
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
         var actual = await client.GetGlobalQuotesAsync(["IBM", "APPL", "MSFT"], TestContext.CancellationToken);
