@@ -9,7 +9,7 @@ namespace ExtendedConsoleApp;
 
 internal class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         Console.WriteLine("Hello, World!");
 
@@ -26,14 +26,10 @@ internal class Program
         // Grab a client and get a quote
         var symbol = "IBM";
         var client = host.Services.GetRequiredService<IAlphaVantageClient>();
-        var quoteTask = client.GetGlobalQuoteAsync(symbol);
-
-        quoteTask.Wait();
-
-        var quote = quoteTask.Result;
+        var quote = await client.GetGlobalQuoteAsync(symbol);
 
         logger.LogInformation("GetGlobalTask IsSuccess: '{success}'", quote.IsSuccess);
-        logger.LogInformation("GetGlobalTask ErrorMessaage: '{message}'", quote.ErrorMessage);
+        logger.LogInformation("GetGlobalTask ErrorMessage: '{message}'", quote.ErrorMessage);
         logger.LogInformation("GetGlobalTask Entity: '{type}'", quote.Result?.GetType().Name ?? "(null)");
 
         // print some result details

@@ -65,7 +65,8 @@ public class GlobalQuote : IEntity
     /// </summary>
     /// <value>A formatted string representing the percentage change with two decimal places and a '%' symbol.</value>
     /// <remarks>
-    /// The percentage is calculated as (Change / PreviousClose * 100). 
+    /// The percentage is calculated as (Change / PreviousClose * 100). This is strictly
+    /// not the same value returned by the API, which does have different formatting.
     /// Returns "0.00%" if PreviousClose is zero to avoid division by zero.
     /// </remarks>
     public string ChangePercent => $"{(PreviousClose != 0 ? (Change / PreviousClose * 100) : 0):F3}%";
