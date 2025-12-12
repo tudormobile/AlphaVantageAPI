@@ -1,6 +1,0 @@
-<Project>
-  <!-- Version Build Output -->
-  <Target Name="WriteVersion" BeforeTargets="Build" Condition="'$(Configuration)' == 'Release'">
-    <WriteLinesToFile Lines="$(Version)" File="$(BaseOutputPath)\$(Configuration)\ver.txt" Overwrite="true" />
-  </Target>
-</Project>

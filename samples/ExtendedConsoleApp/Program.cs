@@ -17,7 +17,7 @@ internal class Program
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
         builder.Services
-            .AddAlphaVantageClient(builder => builder.ApiKey = "demo")
+            .AddAlphaVantageClient(options => options.ApiKey = "demo")
             .AddLogging(builder => builder.AddConsole());
 
         using IHost host = builder.Build();

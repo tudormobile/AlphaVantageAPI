@@ -12,7 +12,7 @@ A lightweight library to access the Apha Vantage API.
 
 ### Quick Start
 
-#### Low-level api:
+#### Low-level (Basic) api:
 ```cs
 using Tudormobile.AlphaVantage;
 
@@ -26,9 +26,11 @@ var json = await client.GetJsonStringAsync(function, symbol);
 // Or document...
 var doc = await client.GetJsonDocumentAsync(function, symbol);
 ```
+[!TIP]: See the sample '*SimpleConsoleApp*'.
+
 #### Using the extensions:
 ```cs
-using Tudormobile.AlphaVantageA;
+using Tudormobile.AlphaVantage;
 using Tudormobile.AlphaVantage.Extensions;
 
 var apiKey = "demo";    // your api key
@@ -40,5 +42,35 @@ var client = AlphaVantageClient.GetBuilder()
 var symbol = "IBM";
 var json = client.GlobalQuote(symbol);
 ```
+#### Using dependency injection:
+```cs
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Tudormobile.AlphaVantage;
+using Tudormobile.AlphaVantage.Extensions;
+
+var apiKey = "demo";    // your api key
+HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+using IHost host = builder.Services
+    .AddAlphaVantageClient(options => options.ApiKey = "demo")
+    .Build();
+
+// Grab a client and get a quote
+var symbol = "IBM";
+var client = host.Services.GetRequiredService<IAlphaVantageClient>();
+var quoteTask = client.GetGlobalQuoteAsync(symbol);
+
+quoteTask.Wait();
+
+var quote = quoteTask.Result;   
+
+// Quote is an entity from the object model
+decimal price = quote.Price;
+/// ...
+```
+[!TIP]: See the sample '*ExtendedConsoleApp*'.
+
+> [!NOTE]
+> Only the free tier Core Stock API is currently implemented.
 
 [NuGET Package README](docs/README.md) | [Source Code README](src/README.md) | [API Documentation](https://tudormobile.github.io/AlphaVantageAPI/)

@@ -7,17 +7,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <!-- Version -->
-  <PropertyGroup>
-    <build>$([System.DateTime]::Now.ToString('yyMM'))</build>
-    <rev>$([System.DateTime]::Now.ToString('100dd'))</rev>
-    <ver>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)\..\..\version.txt').Trim())</ver>
-  </PropertyGroup>
-
   <!-- Package Properties -->
   <PropertyGroup>
-    <AssemblyVersion>$(ver).$(build).$(rev)</AssemblyVersion>
-    <Version>$(ver).$(build)</Version>
     <Company>Tudormobile</Company>
     <Authors>WH Tudor</Authors>
     <Copyright>Copyright © 2025 Bill Tudor</Copyright>
