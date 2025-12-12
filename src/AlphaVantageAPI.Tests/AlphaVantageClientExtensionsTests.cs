@@ -138,7 +138,7 @@ public class AlphaVantageClientExtensionsTests
     }
 
     [TestMethod]
-    public async Task GetGlobalQuotesAsyncTestWithMultipleSymbols()
+    public async Task GetGlobalQuotesAsyncTest()
     {
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
         var actual = await client.GetGlobalQuotesAsync(["IBM", "APPL", "MSFT"], TestContext.CancellationToken);
