@@ -35,7 +35,6 @@ jobs:
       uses: gittools/actions/gitversion/execute@v4
       with:
         updateProjectFiles: true
-        targetpath: src/AlphaVantageAPI
 
     - name: Unit tests
       run: dotnet test --coverage --report-trx --report-trx-filename "output.trx"
