@@ -13,14 +13,29 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 10.0.x
       env:
         NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        
+
+    - name: Setup GitVersion
+      uses: gittools/actions/gitversion/setup@v4
+      with:
+        versionSpec: '6.4.x'
+
+    - name: Determine Version
+      id: version_step # step id used as a reference for output values
+      uses: gittools/actions/gitversion/execute@v4
+      with:
+        updateProjectFiles: true
+
     - name: Unit tests
       run: dotnet test --coverage --report-trx --report-trx-filename "output.trx"
 
@@ -50,15 +65,12 @@ jobs:
       with:
         name: package
         path: src/AlphaVantageAPI/bin/release/*.nupkg
+
     - name: Create Zip for Release
       run: compress-archive -Path src\AlphaVantageAPI\bin\release\*.nupkg -Destination package.zip -Force
-    - name: Get version
-      id: vars
-      run: |
-        $env:ver = Get-Content src\AlphaVantageAPI\bin\release\ver.txt
-        echo version=$env:ver >> $env:GITHUB_OUTPUT
+
     - name: Test output
-      run: echo ${{ steps.vars.outputs.version }}      
+      run: echo ${{ steps.version_step.outputs.fullSemVer }}     
 
     - name: Create release
       if: ${{ github.event_name == 'push' }}
@@ -66,8 +78,8 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         echo "Creating release"
-        echo gh release create --generate-notes v${{ steps.vars.outputs.version }} package.zip
-        gh release create -t ${{ steps.vars.outputs.version }} --generate-notes v${{ steps.vars.outputs.version }} package.zip#package
+        echo gh release create --generate-notes v${{ steps.version_step.outputs.fullSemVer }} package.zip
+        gh release create -t ${{ steps.version_step.outputs.fullSemVer }} --generate-notes v${{ steps.version_step.outputs.fullSemVer }} package.zip#package
 
     - name: Publish package
       if: ${{ github.event_name == 'push' }}
