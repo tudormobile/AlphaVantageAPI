@@ -11,7 +11,7 @@ public class TimeSeriesTests
         var timeSeries = new TimeSeries();
         Assert.AreEqual(string.Empty, timeSeries.Symbol);
         Assert.AreEqual(default, timeSeries.LastUpdated);
-        Assert.AreEqual(TimeSeries.TimeSeriesInterval.OneMin, timeSeries.Interval);
+        Assert.AreEqual(TimeSeries.TimeSeriesInterval.Daily, timeSeries.Interval);
         Assert.IsNotNull(timeSeries.Data);
         Assert.IsEmpty(timeSeries.Data);
     }
