@@ -7,10 +7,6 @@
     <PackageTags>alphavantage;stocks;finance;api-client;trading;market-data;financial-data;quotes;time-series</PackageTags>
     <PackageProjectUrl>https://github.com/tudormobile/AlphaVantageAPI</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/tudormobile/AlphaVantageAPI/releases</PackageReleaseNotes>
-    <AssemblyVersion>0.4.2512.0</AssemblyVersion>
-    <FileVersion>0.4.2512.0</FileVersion>
-    <InformationalVersion>0.4.2512+Branch.wht-gitversion.Sha.edc9457ee7eb371e946211a29b4617fd0442ccaf</InformationalVersion>
-    <Version>0.4.2512</Version>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\docs\README.md" Pack="true" PackagePath="\" />
