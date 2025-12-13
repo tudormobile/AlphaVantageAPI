@@ -35,14 +35,6 @@ jobs:
       uses: gittools/actions/gitversion/execute@v4
       with:
         updateProjectFiles: true
-        overrideConfig: |
-          mode=ContinuousDeployment
-          branches.main.increment=Patch
-          branches.main.prevent-increment-of-merged-branch-version=true
-          branches.feature.increment=Minor
-          branches.feature.tag=alpha
-          branches.pull-request.increment=Patch
-          branches.pull-request.tag=pullrequest
 
     - name: Unit tests
       run: dotnet test --coverage --report-trx --report-trx-filename "output.trx"
