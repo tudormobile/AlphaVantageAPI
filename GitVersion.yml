@@ -1,1 +1,10 @@
+mode: ContinuousDeployment
 workflow: GitHubFlow/v1
+branches:
+  main:
+    increment: Patch
+  feature:
+    increment: Inherit
+major-version-bump-message: '\+semver:\s?(breaking|major)'
+minor-version-bump-message: '\+semver:\s?(feature|minor)'
+patch-version-bump-message: '\+semver:\s?(fix|patch)'
