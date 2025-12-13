@@ -3,10 +3,12 @@
     <AssemblyName>Tudormobile.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>Tudormobile.$(MSBuildProjectName.Replace("API", ""))</RootNamespace>
     <Product>Tudormobile AlphaVantage API</Product>
-    <Description>Lightweight .NET library for accessing the Alpha Vantage financial data API. Supports stock quotes, time series data, symbol search with strongly-typed models and fluent API.</Description>
+    <Description>Lightweight .NET library for accessing the Alpha Vantage financial data API. Supports stock quotes, time series data, symbol search, and more with strongly-typed entity models. Optionally supports dependency injection (DI) and logging.</Description>
     <PackageTags>alphavantage;stocks;finance;api-client;trading;market-data;financial-data;quotes;time-series</PackageTags>
-    <PackageProjectUrl>https://github.com/tudormobile/AlphaVantageAPI</PackageProjectUrl>
+    <PackageProjectUrl>https://tudormobile.github.io/AlphaVantageAPI/</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/tudormobile/AlphaVantageAPI/releases</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/tudormobile/AlphaVantageAPI</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\docs\README.md" Pack="true" PackagePath="\" />
