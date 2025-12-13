@@ -18,6 +18,7 @@ public class AlphaVantageClientBuilderTests
 
         // Assert
         Assert.AreEqual(apiKey, builder.ApiKey);
+        Assert.AreSame(builder, result);
     }
 
     [TestMethod]
