@@ -38,10 +38,10 @@ jobs:
         overrideConfig: |
           mode=ContinuousDeployment
           branches.main.increment=Patch
-          branches.main.prevent-increment-of-merged-branch-version=true 
-          branches.feature.increment=Minor 
+          branches.main.prevent-increment-of-merged-branch-version=true
+          branches.feature.increment=Minor
           branches.feature.tag=alpha
-          branches.pull-request.increment=Patch 
+          branches.pull-request.increment=Patch
           branches.pull-request.tag=pullrequest
 
     - name: Unit tests
