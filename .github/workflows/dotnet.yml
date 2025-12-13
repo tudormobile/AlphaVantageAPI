@@ -35,6 +35,7 @@ jobs:
       uses: gittools/actions/gitversion/execute@v4
       with:
         updateProjectFiles: true
+        workflow: GitHubFlow/v1
 
     - name: Unit tests
       run: dotnet test --coverage --report-trx --report-trx-filename "output.trx"
