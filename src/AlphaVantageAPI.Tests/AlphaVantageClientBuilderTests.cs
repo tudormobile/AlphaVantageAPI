@@ -28,7 +28,7 @@ public class AlphaVantageClientBuilderTests
         var logger = new MockLogger();
 
         // Act
-        var result = builder.AddLogging(logger);
+        builder.AddLogging(logger);
 
         // Assert
         Assert.AreEqual(logger, builder.Logger);
