@@ -35,7 +35,7 @@ public class AlphaVantageClientBuilderTests
     }
 
     [TestMethod]
-    public void AddLogget_ReturnsBuilderInstance_ForFluentChaining()
+    public void AddLogger_ReturnsBuilderInstance_ForFluentChaining()
     {
         var builder = new AlphaVantageClientBuilder();
 
