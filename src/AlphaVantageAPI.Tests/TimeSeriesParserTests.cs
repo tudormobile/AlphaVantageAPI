@@ -240,4 +240,307 @@ public class TimeSeriesParserTests
         Assert.AreEqual(0m, entry.Value.Close);
         Assert.AreEqual(0L, entry.Value.Volume);
     }
+
+    [TestMethod]
+    public void FromDocument_WithCaseInsensitiveSymbol_ParsesCorrectly()
+    {
+        // Arrange
+        var document = JsonDocument.Parse(jsonDaily);
+
+        // Act - symbol case doesn't match metadata
+        var timeSeries = TimeSeriesParser.FromDocument(document, "ibm", TimeSeries.TimeSeriesInterval.Daily);
+
+        // Assert
+        Assert.IsNotNull(timeSeries);
+        Assert.AreEqual("ibm", timeSeries.Symbol);
+    }
+
+    [TestMethod]
+    public void FromDocument_WithMissingMetaData_ReturnsNull()
+    {
+        // Arrange
+        var jsonWithoutMeta = @"
+{
+    ""Time Series (Daily)"": {
+        ""2025-12-08"": {
+            ""1. open"": ""309.6200"",
+            ""2. high"": ""315.3454"",
+            ""3. low"": ""307.9500"",
+            ""4. close"": ""309.1800"",
+            ""5. volume"": ""3615794""
+        }
+    }
+}";
+        var document = JsonDocument.Parse(jsonWithoutMeta);
+
+        // Act
+        var timeSeries = TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
+
+        // Assert
+        Assert.IsNull(timeSeries);
+    }
+
+    [TestMethod]
+    public void FromDocument_WithMissingTimeSeriesProperty_ReturnsNull()
+    {
+        // Arrange
+        var jsonWithoutTimeSeries = @"
+{
+    ""Meta Data"": {
+        ""1. Information"": ""Daily Prices (open, high, low, close) and Volumes"",
+        ""2. Symbol"": ""IBM"",
+        ""3. Last Refreshed"": ""2025-12-08"",
+        ""4. Output Size"": ""Compact"",
+        ""5. Time Zone"": ""US/Eastern""
+    }
+}";
+        var document = JsonDocument.Parse(jsonWithoutTimeSeries);
+
+        // Act
+        var timeSeries = TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
+
+        // Assert
+        Assert.IsNull(timeSeries);
+    }
+
+    [TestMethod]
+    public void FromDocument_WithEmptyTimeSeriesData_ReturnsEmptyData()
+    {
+        // Arrange
+        var jsonWithEmptyData = @"
+{
+    ""Meta Data"": {
+        ""1. Information"": ""Daily Prices (open, high, low, close) and Volumes"",
+        ""2. Symbol"": ""IBM"",
+        ""3. Last Refreshed"": ""2025-12-08"",
+        ""4. Output Size"": ""Compact"",
+        ""5. Time Zone"": ""US/Eastern""
+    },
+    ""Time Series (Daily)"": {}
+}";
+        var document = JsonDocument.Parse(jsonWithEmptyData);
+
+        // Act
+        var timeSeries = TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
+
+        // Assert
+        Assert.IsNotNull(timeSeries);
+        Assert.HasCount(0, timeSeries.Data);
+    }
+
+    [TestMethod]
+    public void FromDocument_WithInvalidDateKeys_SkipsInvalidEntries()
+    {
+        // Arrange
+        var jsonWithInvalidDates = @"
+{
+    ""Meta Data"": {
+        ""1. Information"": ""Daily Prices (open, high, low, close) and Volumes"",
+        ""2. Symbol"": ""IBM"",
+        ""3. Last Refreshed"": ""2025-12-08"",
+        ""4. Output Size"": ""Compact"",
+        ""5. Time Zone"": ""US/Eastern""
+    },
+    ""Time Series (Daily)"": {
+        ""2025-12-08"": {
+            ""1. open"": ""309.6200"",
+            ""2. high"": ""315.3454"",
+            ""3. low"": ""307.9500"",
+            ""4. close"": ""309.1800"",
+            ""5. volume"": ""3615794""
+        },
+        ""invalid-date"": {
+            ""1. open"": ""100.00"",
+            ""2. high"": ""101.00"",
+            ""3. low"": ""99.00"",
+            ""4. close"": ""100.50"",
+            ""5. volume"": ""1000""
+        },
+        ""2025-12-05"": {
+            ""1. open"": ""308.5900"",
+            ""2. high"": ""311.8300"",
+            ""3. low"": ""307.1800"",
+            ""4. close"": ""307.9400"",
+            ""5. volume"": ""2344667""
+        }
+    }
+}";
+        var document = JsonDocument.Parse(jsonWithInvalidDates);
+
+        // Act
+        var timeSeries = TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
+
+        // Assert
+        Assert.IsNotNull(timeSeries);
+        Assert.HasCount(2, timeSeries.Data); // Only valid dates are included
+        Assert.IsTrue(timeSeries.Data.ContainsKey(new DateOnly(2025, 12, 8)));
+        Assert.IsTrue(timeSeries.Data.ContainsKey(new DateOnly(2025, 12, 5)));
+        Assert.IsFalse(timeSeries.Data.Any(x => x.Key == default));
+    }
+
+    [TestMethod]
+    public void FromDocument_WithMissingSymbolInMetadata_ThrowsArgumentException()
+    {
+        // Arrange
+        var jsonWithoutSymbol = @"
+{
+    ""Meta Data"": {
+        ""1. Information"": ""Daily Prices (open, high, low, close) and Volumes"",
+        ""3. Last Refreshed"": ""2025-12-08"",
+        ""4. Output Size"": ""Compact"",
+        ""5. Time Zone"": ""US/Eastern""
+    },
+    ""Time Series (Daily)"": {}
+}";
+        var document = JsonDocument.Parse(jsonWithoutSymbol);
+
+        // Act & Assert
+        Assert.ThrowsExactly<ArgumentException>(() =>
+        {
+            TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
+        });
+    }
+
+    [TestMethod]
+    public void FromDocument_WithMissingLastRefreshed_ThrowsFormatException()
+    {
+        // Arrange
+        var jsonWithoutLastRefreshed = @"
+{
+    ""Meta Data"": {
+        ""1. Information"": ""Daily Prices (open, high, low, close) and Volumes"",
+        ""2. Symbol"": ""IBM"",
+        ""4. Output Size"": ""Compact"",
+        ""5. Time Zone"": ""US/Eastern""
+    },
+    ""Time Series (Daily)"": {}
+}";
+        var document = JsonDocument.Parse(jsonWithoutLastRefreshed);
+
+        // Act & Assert
+        Assert.ThrowsExactly<FormatException>(() =>
+        {
+            TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
+        });
+    }
+
+    [TestMethod]
+    public void FromDocument_WithAllIntervalsSupported_ParsesCorrectly()
+    {
+        // Test Daily
+        var dailyResult = TimeSeriesParser.FromDocument(JsonDocument.Parse(jsonDaily), "IBM", TimeSeries.TimeSeriesInterval.Daily);
+        Assert.IsNotNull(dailyResult);
+        Assert.AreEqual(TimeSeries.TimeSeriesInterval.Daily, dailyResult.Interval);
+
+        // Test Weekly
+        var weeklyResult = TimeSeriesParser.FromDocument(JsonDocument.Parse(jsonWeekly), "IBM", TimeSeries.TimeSeriesInterval.Weekly);
+        Assert.IsNotNull(weeklyResult);
+        Assert.AreEqual(TimeSeries.TimeSeriesInterval.Weekly, weeklyResult.Interval);
+
+        // Test Monthly
+        var monthlyResult = TimeSeriesParser.FromDocument(JsonDocument.Parse(jsonMonthly), "IBM", TimeSeries.TimeSeriesInterval.Monthly);
+        Assert.IsNotNull(monthlyResult);
+        Assert.AreEqual(TimeSeries.TimeSeriesInterval.Monthly, monthlyResult.Interval);
+    }
+
+    [TestMethod]
+    public void FromDocument_WithPartialDataFields_UsesDefaults()
+    {
+        // Arrange
+        var jsonWithPartialFields = @"
+{
+    ""Meta Data"": {
+        ""1. Information"": ""Daily Prices (open, high, low, close) and Volumes"",
+        ""2. Symbol"": ""IBM"",
+        ""3. Last Refreshed"": ""2025-12-08"",
+        ""4. Output Size"": ""Compact"",
+        ""5. Time Zone"": ""US/Eastern""
+    },
+    ""Time Series (Daily)"": {
+        ""2025-12-08"": {
+            ""1. open"": ""309.6200"",
+            ""3. low"": ""307.9500""
+        }
+    }
+}";
+        var document = JsonDocument.Parse(jsonWithPartialFields);
+
+        // Act
+        var timeSeries = TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.Daily);
+
+        // Assert
+        Assert.IsNotNull(timeSeries);
+        Assert.HasCount(1, timeSeries.Data);
+        var entry = timeSeries.Data.First();
+        Assert.AreEqual(309.62m, entry.Value.Open);
+        Assert.AreEqual(0m, entry.Value.High);
+        Assert.AreEqual(307.95m, entry.Value.Low);
+        Assert.AreEqual(0m, entry.Value.Close);
+        Assert.AreEqual(0L, entry.Value.Volume);
+    }
+
+    [TestMethod]
+    public void FromDocument_UnsupportedInterval_OneMin_ThrowsNotSupportedException()
+    {
+        // Arrange
+        var document = JsonDocument.Parse(jsonDaily);
+
+        // Act & Assert
+        Assert.ThrowsExactly<NotSupportedException>(() =>
+        {
+            TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.OneMin);
+        });
+    }
+
+    [TestMethod]
+    public void FromDocument_UnsupportedInterval_FiveMin_ThrowsNotSupportedException()
+    {
+        // Arrange
+        var document = JsonDocument.Parse(jsonDaily);
+
+        // Act & Assert
+        Assert.ThrowsExactly<NotSupportedException>(() =>
+        {
+            TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.FiveMin);
+        });
+    }
+
+    [TestMethod]
+    public void FromDocument_UnsupportedInterval_FifteenMin_ThrowsNotSupportedException()
+    {
+        // Arrange
+        var document = JsonDocument.Parse(jsonDaily);
+
+        // Act & Assert
+        Assert.ThrowsExactly<NotSupportedException>(() =>
+        {
+            TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.FifteenMin);
+        });
+    }
+
+    [TestMethod]
+    public void FromDocument_UnsupportedInterval_ThirtyMin_ThrowsNotSupportedException()
+    {
+        // Arrange
+        var document = JsonDocument.Parse(jsonDaily);
+
+        // Act & Assert
+        Assert.ThrowsExactly<NotSupportedException>(() =>
+        {
+            TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.ThirtyMin);
+        });
+    }
+
+    [TestMethod]
+    public void FromDocument_UnsupportedInterval_SixtyMin_ThrowsNotSupportedException()
+    {
+        // Arrange
+        var document = JsonDocument.Parse(jsonDaily);
+
+        // Act & Assert
+        Assert.ThrowsExactly<NotSupportedException>(() =>
+        {
+            TimeSeriesParser.FromDocument(document, "IBM", TimeSeries.TimeSeriesInterval.SixtyMin);
+        });
+    }
 }

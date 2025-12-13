@@ -21,9 +21,9 @@ public class AlphaVantageClient : IAlphaVantageClient
     /// Initializes a new instance of the AlphaVantageClient class using the specified API key.
     /// </summary>
     /// <param name="apiKey">The API key used to authenticate requests to the Alpha Vantage service. Cannot be null or empty.</param>
-    /// <param name="client">The HttpClient instance used to make HTTP requests to the Alpha Vantage API.</param>
+    /// <param name="httpClient">The HttpClient instance used to make HTTP requests to the Alpha Vantage API.</param>
     /// <param name="logger">Optional logger instance for logging diagnostic information. If null, a NullLogger will be used.</param>
-    public AlphaVantageClient(string apiKey, HttpClient client, ILogger? logger = null)
+    public AlphaVantageClient(string apiKey, HttpClient httpClient, ILogger? logger = null)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
         {
@@ -31,7 +31,7 @@ public class AlphaVantageClient : IAlphaVantageClient
         }
         _apiKey = apiKey;
         _logger = logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance;
-        _httpClient = client ?? throw new ArgumentNullException(nameof(client));
+        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         _logger.LogDebug("AlphaVantageClient initialized.");
     }
 
@@ -129,34 +129,21 @@ public class AlphaVantageClient : IAlphaVantageClient
         }
         catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
         {
-            response?.Dispose();
+            response.Dispose();
             var label = function == AlphaVantageFunction.SYMBOL_SEARCH ? "keywords" : "symbol";
             _logger.LogWarning("Rate limit hit for {Function} - {Label}: {Value}", function, label, symbolOrKeywords);
-            throw new AlphaVantageException(
-                "Rate limit exceeded. Please wait before making more requests. " +
-                "Consider implementing rate limiting in your application.", ex);
+            throw new AlphaVantageException("Rate limit exceeded", ex);
         }
         catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            response?.Dispose();
+            response.Dispose();
             throw new AlphaVantageException("Invalid API key", ex);
         }
         catch (HttpRequestException ex)
         {
-            response?.Dispose();
+            response.Dispose();
             var label = function == AlphaVantageFunction.SYMBOL_SEARCH ? "keywords" : "symbol";
             throw new AlphaVantageException($"Failed to fetch function '{function}' for {label} '{symbolOrKeywords}': {ex.Message}", ex);
-        }
-        catch (OperationCanceledException ex)
-        {
-            response?.Dispose();
-            var label = function == AlphaVantageFunction.SYMBOL_SEARCH ? "keywords" : "symbol";
-            throw new AlphaVantageException($"Operation Cancelled; function '{function}' for {label} '{symbolOrKeywords}': {ex.Message}", ex);
-        }
-        catch
-        {
-            response?.Dispose();
-            throw;
         }
     }
 }

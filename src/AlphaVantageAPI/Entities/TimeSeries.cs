@@ -28,7 +28,7 @@ public class TimeSeries : IEntity
     /// </summary>
     /// <value>A <see cref="TimeSeriesInterval"/> value indicating the granularity of the time series data
     /// (e.g., daily, weekly, intraday intervals).</value>
-    public TimeSeriesInterval Interval { get; init; }
+    public TimeSeriesInterval Interval { get; init; } = TimeSeriesInterval.Daily; // More sensible default
 
     /// <summary>
     /// Gets the dictionary containing time series data points indexed by date.

@@ -16,21 +16,24 @@ internal class ResponseParser
 
     private static string FindErrorMessage(JsonElement root, string defaultMessage)
     {
-        if (root.TryGetProperty("Information", out JsonElement informationElement))
+        if (root.ValueKind == JsonValueKind.Object)
         {
-            var message = informationElement.GetString();
-            if (!string.IsNullOrEmpty(message))
+            if (root.TryGetProperty("Information", out JsonElement informationElement))
             {
-                return message;
+                var message = informationElement.GetString();
+                if (!string.IsNullOrWhiteSpace(message))
+                {
+                    return message;
+                }
             }
-        }
 
-        if (root.TryGetProperty("Error Message", out JsonElement errorElement))
-        {
-            var message = errorElement.GetString();
-            if (!string.IsNullOrEmpty(message))
+            if (root.TryGetProperty("Error Message", out JsonElement errorElement))
             {
-                return message;
+                var message = errorElement.GetString();
+                if (!string.IsNullOrWhiteSpace(message))
+                {
+                    return message;
+                }
             }
         }
 

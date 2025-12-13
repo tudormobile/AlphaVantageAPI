@@ -103,6 +103,195 @@ public class SymbolMatchesParserTests
         Assert.AreEqual(SymbolMatch.Regions.Unknown, firstMatch.Region);
     }
 
+    [TestMethod]
+    public void FromDocument_WithTypeFilterOnly_ReturnsFilteredMatches()
+    {
+        // Arrange
+        var keywords = "Test";
+        var doc = JsonDocument.Parse(mixedTypesJson);
+
+        // Act
+        var result = SymbolMatchesParser.FromDocument(doc, keywords, SymbolMatch.MatchTypes.ETF);
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.HasCount(1, result.Matches);
+        Assert.AreEqual(SymbolMatch.MatchTypes.ETF, result.Matches[0].MatchType);
+    }
+
+    [TestMethod]
+    public void FromDocument_WithRegionFilterOnly_ReturnsFilteredMatches()
+    {
+        // Arrange
+        var keywords = "Test";
+        var doc = JsonDocument.Parse(json);
+
+        // Act
+        var result = SymbolMatchesParser.FromDocument(doc, keywords, SymbolMatch.MatchTypes.Any, SymbolMatch.Regions.FFM);
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.HasCount(2, result.Matches);
+        foreach (var match in result.Matches)
+        {
+            Assert.AreEqual(SymbolMatch.Regions.FFM, match.Region);
+        }
+    }
+
+    [TestMethod]
+    public void FromDocument_WithNoMatchingTypeFilter_ReturnsEmptyList()
+    {
+        // Arrange
+        var keywords = "Test";
+        var doc = JsonDocument.Parse(json);
+
+        // Act
+        var result = SymbolMatchesParser.FromDocument(doc, keywords, SymbolMatch.MatchTypes.Bond);
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.HasCount(0, result.Matches);
+    }
+
+    [TestMethod]
+    public void FromDocument_WithNoMatchingRegionFilter_ReturnsEmptyList()
+    {
+        // Arrange
+        var keywords = "Test";
+        var doc = JsonDocument.Parse(json);
+
+        // Act
+        var result = SymbolMatchesParser.FromDocument(doc, keywords, SymbolMatch.MatchTypes.Any, SymbolMatch.Regions.Unknown);
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.HasCount(0, result.Matches);
+    }
+
+    [TestMethod]
+    public void FromDocument_WithBestMatchesAsNonArray_ReturnsEmptyList()
+    {
+        // Arrange
+        var keywords = "Test";
+        var doc = JsonDocument.Parse(@"{ ""bestMatches"": ""not an array"" }");
+
+        // Act
+        var result = SymbolMatchesParser.FromDocument(doc, keywords);
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.HasCount(0, result.Matches);
+    }
+
+    [TestMethod]
+    public void ParseRegion_WithUnitedStates_ReturnsUS()
+    {
+        // Act
+        var result = SymbolMatchesParser.ParseRegion("United States");
+
+        // Assert
+        Assert.AreEqual(SymbolMatch.Regions.US, result);
+    }
+
+    [TestMethod]
+    public void ParseRegion_WithUnitedKingdom_ReturnsUK()
+    {
+        // Act
+        var result = SymbolMatchesParser.ParseRegion("United Kingdom");
+
+        // Assert
+        Assert.AreEqual(SymbolMatch.Regions.UK, result);
+    }
+
+    [TestMethod]
+    public void ParseRegion_WithFrankfurt_ReturnsFFM()
+    {
+        // Act
+        var result = SymbolMatchesParser.ParseRegion("Frankfurt");
+
+        // Assert
+        Assert.AreEqual(SymbolMatch.Regions.FFM, result);
+    }
+
+    [TestMethod]
+    public void ParseRegion_WithEnumNameCaseInsensitive_ReturnsEnum()
+    {
+        // Act
+        var resultLower = SymbolMatchesParser.ParseRegion("us");
+        var resultUpper = SymbolMatchesParser.ParseRegion("US");
+        var resultMixed = SymbolMatchesParser.ParseRegion("Us");
+
+        // Assert
+        Assert.AreEqual(SymbolMatch.Regions.US, resultLower);
+        Assert.AreEqual(SymbolMatch.Regions.US, resultUpper);
+        Assert.AreEqual(SymbolMatch.Regions.US, resultMixed);
+    }
+
+    [TestMethod]
+    public void ParseRegion_WithUnknownRegion_ReturnsUnknown()
+    {
+        // Act
+        var result = SymbolMatchesParser.ParseRegion("Mars");
+
+        // Assert
+        Assert.AreEqual(SymbolMatch.Regions.Unknown, result);
+    }
+
+    [TestMethod]
+    public void ParseRegion_WithEmptyString_ReturnsUnknown()
+    {
+        // Act
+        var result = SymbolMatchesParser.ParseRegion("");
+
+        // Assert
+        Assert.AreEqual(SymbolMatch.Regions.Unknown, result);
+    }
+
+    [TestMethod]
+    public void FromDocument_WithAllMatchTypes_ParsesCorrectly()
+    {
+        // Arrange
+        var keywords = "Test";
+        var doc = JsonDocument.Parse(allTypesJson);
+
+        // Act
+        var result = SymbolMatchesParser.FromDocument(doc, keywords);
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.HasCount(8, result.Matches);
+        Assert.AreEqual(SymbolMatch.MatchTypes.Equity, result.Matches[0].MatchType);
+        Assert.AreEqual(SymbolMatch.MatchTypes.ETF, result.Matches[1].MatchType);
+        Assert.AreEqual(SymbolMatch.MatchTypes.MutualFund, result.Matches[2].MatchType);
+        Assert.AreEqual(SymbolMatch.MatchTypes.Index, result.Matches[3].MatchType);
+        Assert.AreEqual(SymbolMatch.MatchTypes.Commodity, result.Matches[4].MatchType);
+        Assert.AreEqual(SymbolMatch.MatchTypes.Currency, result.Matches[5].MatchType);
+        Assert.AreEqual(SymbolMatch.MatchTypes.Cryptocurrency, result.Matches[6].MatchType);
+        Assert.AreEqual(SymbolMatch.MatchTypes.Bond, result.Matches[7].MatchType);
+    }
+
+    [TestMethod]
+    public void FromDocument_WithMissingOptionalFields_UsesDefaults()
+    {
+        // Arrange
+        var keywords = "Test";
+        var doc = JsonDocument.Parse(minimalJson);
+
+        // Act
+        var result = SymbolMatchesParser.FromDocument(doc, keywords);
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.HasCount(1, result.Matches);
+        var match = result.Matches[0];
+        Assert.AreEqual("TEST", match.Symbol);
+        Assert.AreEqual("", match.Name);
+        Assert.AreEqual("", match.Currency);
+        Assert.AreEqual(0.0, match.MatchScore);
+        Assert.AreEqual(TimeOnly.MinValue, match.MarketOpen);
+        Assert.AreEqual(TimeOnly.MinValue, match.MarketClose);
+    }
+
 
     private readonly string invalidJson = @"
 {
@@ -201,4 +390,128 @@ public class SymbolMatchesParserTests
     ]
 }";
 
+    private readonly string mixedTypesJson = @"
+{
+    ""bestMatches"": [
+        {
+            ""1. symbol"": ""SPY"",
+            ""2. name"": ""SPDR S&P 500 ETF"",
+            ""3. type"": ""ETF"",
+            ""4. region"": ""United States"",
+            ""5. marketOpen"": ""09:30"",
+            ""6. marketClose"": ""16:00"",
+            ""7. timezone"": ""UTC-04"",
+            ""8. currency"": ""USD"",
+            ""9. matchScore"": ""0.9""
+        },
+        {
+            ""1. symbol"": ""AAPL"",
+            ""2. name"": ""Apple Inc"",
+            ""3. type"": ""Equity"",
+            ""4. region"": ""United States"",
+            ""5. marketOpen"": ""09:30"",
+            ""6. marketClose"": ""16:00"",
+            ""7. timezone"": ""UTC-04"",
+            ""8. currency"": ""USD"",
+            ""9. matchScore"": ""0.8""
+        }
+    ]
+}";
+
+    private readonly string allTypesJson = @"
+{
+    ""bestMatches"": [
+        {
+            ""1. symbol"": ""AAPL"",
+            ""2. name"": ""Apple Inc"",
+            ""3. type"": ""Equity"",
+            ""4. region"": ""United States"",
+            ""5. marketOpen"": ""09:30"",
+            ""6. marketClose"": ""16:00"",
+            ""8. currency"": ""USD"",
+            ""9. matchScore"": ""0.9""
+        },
+        {
+            ""1. symbol"": ""SPY"",
+            ""2. name"": ""SPDR S&P 500"",
+            ""3. type"": ""ETF"",
+            ""4. region"": ""United States"",
+            ""5. marketOpen"": ""09:30"",
+            ""6. marketClose"": ""16:00"",
+            ""8. currency"": ""USD"",
+            ""9. matchScore"": ""0.9""
+        },
+        {
+            ""1. symbol"": ""VFIAX"",
+            ""2. name"": ""Vanguard 500 Index"",
+            ""3. type"": ""MutualFund"",
+            ""4. region"": ""United States"",
+            ""5. marketOpen"": ""09:30"",
+            ""6. marketClose"": ""16:00"",
+            ""8. currency"": ""USD"",
+            ""9. matchScore"": ""0.9""
+        },
+        {
+            ""1. symbol"": ""SPX"",
+            ""2. name"": ""S&P 500 Index"",
+            ""3. type"": ""Index"",
+            ""4. region"": ""United States"",
+            ""5. marketOpen"": ""09:30"",
+            ""6. marketClose"": ""16:00"",
+            ""8. currency"": ""USD"",
+            ""9. matchScore"": ""0.9""
+        },
+        {
+            ""1. symbol"": ""GC"",
+            ""2. name"": ""Gold Futures"",
+            ""3. type"": ""Commodity"",
+            ""4. region"": ""United States"",
+            ""5. marketOpen"": ""09:30"",
+            ""6. marketClose"": ""16:00"",
+            ""8. currency"": ""USD"",
+            ""9. matchScore"": ""0.9""
+        },
+        {
+            ""1. symbol"": ""EUR/USD"",
+            ""2. name"": ""Euro US Dollar"",
+            ""3. type"": ""Currency"",
+            ""4. region"": ""United States"",
+            ""5. marketOpen"": ""09:30"",
+            ""6. marketClose"": ""16:00"",
+            ""8. currency"": ""USD"",
+            ""9. matchScore"": ""0.9""
+        },
+        {
+            ""1. symbol"": ""BTC"",
+            ""2. name"": ""Bitcoin"",
+            ""3. type"": ""Cryptocurrency"",
+            ""4. region"": ""United States"",
+            ""5. marketOpen"": ""00:00"",
+            ""6. marketClose"": ""23:59"",
+            ""8. currency"": ""USD"",
+            ""9. matchScore"": ""0.9""
+        },
+        {
+            ""1. symbol"": ""US10Y"",
+            ""2. name"": ""US 10 Year Treasury"",
+            ""3. type"": ""Bond"",
+            ""4. region"": ""United States"",
+            ""5. marketOpen"": ""09:30"",
+            ""6. marketClose"": ""16:00"",
+            ""8. currency"": ""USD"",
+            ""9. matchScore"": ""0.9""
+        }
+    ]
+}";
+
+    private readonly string minimalJson = @"
+{
+    ""bestMatches"": [
+        {
+            ""1. symbol"": ""TEST"",
+            ""3. type"": ""Equity"",
+            ""4. region"": ""United States""
+        }
+    ]
+}";
 }

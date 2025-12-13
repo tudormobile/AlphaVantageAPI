@@ -19,7 +19,7 @@ public class AlphaVantageClientTests
     [ClassCleanup]
     public static void ClassCleanup()
     {
-        _httpClient?.Dispose();
+        _httpClient!.Dispose();
     }
 
     [TestMethod]
@@ -73,6 +73,14 @@ public class AlphaVantageClientTests
     }
 
     [TestMethod]
+    public void Constructor_WithNullHttpClient_ThrowsArgumentException()
+    {
+        // Act & Assert
+        var ex = Assert.ThrowsExactly<ArgumentNullException>(() => new AlphaVantageClient("key", null!));
+        Assert.AreEqual("httpClient", ex.ParamName);
+    }
+
+    [TestMethod]
     public async Task GetJsonStringAsync_WithValidParameters()
     {
         // Arrange
@@ -86,6 +94,143 @@ public class AlphaVantageClientTests
         Assert.IsNotNull(jsonString);
         Assert.Contains("\"Global Quote\"", jsonString);
         Assert.Contains("\"IBM\"", jsonString);
+    }
+
+    [TestMethod]
+    public async Task GetJsonStringAsync_WithNullSymbol_ThrowsArgumentException()
+    {
+        // Arrange
+        var apiKey = "demo"; // Alpha Vantage provides a demo API key for testing
+        var client = new AlphaVantageClient(apiKey, _httpClient!);
+        var function = AlphaVantageFunction.GLOBAL_QUOTE;
+        string? symbol = null;
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => client.GetJsonStringAsync(function, symbol!, TestContext.CancellationToken));
+        Assert.AreEqual("symbol", ex.ParamName);
+    }
+
+    [TestMethod]
+    public async Task GetJsonDocumentAsync_WithNullSymbol_ThrowsArgumentException()
+    {
+        // Arrange
+        var apiKey = "demo"; // Alpha Vantage provides a demo API key for testing
+        var client = new AlphaVantageClient(apiKey, _httpClient!);
+        var function = AlphaVantageFunction.GLOBAL_QUOTE;
+        string? symbol = null;
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => client.GetJsonDocumentAsync(function, symbol!, TestContext.CancellationToken));
+        Assert.AreEqual("symbol", ex.ParamName);
+    }
+
+    [TestMethod]
+    public async Task GetJsonDocumentAsync_HttpClientThrowsException()
+    {
+        // Arrange
+        var apiKey = "demo"; // Alpha Vantage provides a demo API key for testing
+        var mockHandler = new MockHttpMessageHandler() { AlwaysThrows = new Exception("ExceptionMessage") };
+        using var httpClient = new HttpClient(mockHandler);
+        var client = new AlphaVantageClient(apiKey, httpClient);
+        var function = AlphaVantageFunction.GLOBAL_QUOTE;
+        var symbol = "IBM";
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<Exception>(() => client.GetJsonDocumentAsync(function, symbol, TestContext.CancellationToken));
+        Assert.AreEqual("ExceptionMessage", ex.Message);
+    }
+
+    [TestMethod]
+    public async Task GetJsonStringAsync_HttpClientThrowsException()
+    {
+        // Arrange
+        var apiKey = "demo"; // Alpha Vantage provides a demo API key for testing
+        var mockHandler = new MockHttpMessageHandler() { AlwaysThrows = new Exception("ExceptionMessage") };
+        using var httpClient = new HttpClient(mockHandler);
+        var client = new AlphaVantageClient(apiKey, httpClient);
+        var function = AlphaVantageFunction.GLOBAL_QUOTE;
+        var symbol = "IBM";
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<Exception>(() => client.GetJsonStringAsync(function, symbol, TestContext.CancellationToken));
+        Assert.AreEqual("ExceptionMessage", ex.Message);
+    }
+
+    [TestMethod]
+    public async Task GetJsonDocumentAsync_HttpClientTooManyRequests()
+    {
+        // Arrange
+        var apiKey = "demo"; // Alpha Vantage provides a demo API key for testing
+        var mockHandler = new MockHttpMessageHandler() { AlwaysResponds = new HttpResponseMessage(System.Net.HttpStatusCode.TooManyRequests) };
+        using var httpClient = new HttpClient(mockHandler);
+        var client = new AlphaVantageClient(apiKey, httpClient);
+        var function = AlphaVantageFunction.GLOBAL_QUOTE;
+        var symbol = "IBM";
+        // Act & Assert
+        var ex = await Assert.ThrowsExactlyAsync<AlphaVantageException>(() => client.GetJsonDocumentAsync(function, symbol, TestContext.CancellationToken));
+        Assert.AreEqual("Rate limit exceeded", ex.Message);
+    }
+
+    [TestMethod]
+    public async Task GetJsonStringAsync_HttpClientTooManyRequests()
+    {
+        // Arrange
+        var apiKey = "demo"; // Alpha Vantage provides a demo API key for testing
+        var mockHandler = new MockHttpMessageHandler() { AlwaysResponds = new HttpResponseMessage(System.Net.HttpStatusCode.TooManyRequests) };
+        using var httpClient = new HttpClient(mockHandler);
+        var client = new AlphaVantageClient(apiKey, httpClient);
+        var function = AlphaVantageFunction.SYMBOL_SEARCH;
+        var symbol = "IBM";
+        // Act & Assert
+        var ex = await Assert.ThrowsExactlyAsync<AlphaVantageException>(() => client.GetJsonStringAsync(function, symbol, TestContext.CancellationToken));
+        Assert.AreEqual("Rate limit exceeded", ex.Message);
+    }
+
+    [TestMethod]
+    public async Task GetJsonStringAsync_HttpClientUnauthorized()
+    {
+        // Arrange
+        var apiKey = "demo"; // Alpha Vantage provides a demo API key for testing
+        var mockHandler = new MockHttpMessageHandler() { AlwaysResponds = new HttpResponseMessage(System.Net.HttpStatusCode.Unauthorized) };
+        using var httpClient = new HttpClient(mockHandler);
+        var client = new AlphaVantageClient(apiKey, httpClient);
+        var function = AlphaVantageFunction.GLOBAL_QUOTE;
+        var symbol = "IBM";
+        // Act & Assert
+        var ex = await Assert.ThrowsExactlyAsync<AlphaVantageException>(() => client.GetJsonStringAsync(function, symbol, TestContext.CancellationToken));
+        Assert.AreEqual("Invalid API key", ex.Message);
+    }
+
+    [TestMethod]
+    public async Task GetJsonStringAsync_InternalServerError()
+    {
+        // Arrange
+        var apiKey = "demo"; // Alpha Vantage provides a demo API key for testing
+        var mockHandler = new MockHttpMessageHandler() { AlwaysResponds = new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError) };
+        using var httpClient = new HttpClient(mockHandler);
+        var client = new AlphaVantageClient(apiKey, httpClient);
+        var function = AlphaVantageFunction.GLOBAL_QUOTE;
+        var symbol = "IBM";
+        // Act & Assert
+        var ex = await Assert.ThrowsExactlyAsync<AlphaVantageException>(() => client.GetJsonStringAsync(function, symbol, TestContext.CancellationToken));
+        Assert.StartsWith("Failed to fetch function", ex.Message);
+        Assert.Contains("symbol", ex.Message);
+        Assert.IsInstanceOfType(ex.InnerException, typeof(HttpRequestException));
+        Assert.AreEqual(System.Net.HttpStatusCode.InternalServerError, ((HttpRequestException)ex.InnerException).StatusCode);
+    }
+
+    [TestMethod]
+    public async Task GetJsonDocumentAsync_InternalServerError()
+    {
+        // Arrange
+        var apiKey = "demo"; // Alpha Vantage provides a demo API key for testing
+        var mockHandler = new MockHttpMessageHandler() { AlwaysResponds = new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError) };
+        using var httpClient = new HttpClient(mockHandler);
+        var client = new AlphaVantageClient(apiKey, httpClient);
+        var function = AlphaVantageFunction.SYMBOL_SEARCH;
+        var symbol = "IBM";
+        // Act & Assert
+        var ex = await Assert.ThrowsExactlyAsync<AlphaVantageException>(() => client.GetJsonDocumentAsync(function, symbol, TestContext.CancellationToken));
+        Assert.StartsWith("Failed to fetch function", ex.Message);
+        Assert.Contains("keywords", ex.Message);
+        Assert.IsInstanceOfType(ex.InnerException, typeof(HttpRequestException));
+        Assert.AreEqual(System.Net.HttpStatusCode.InternalServerError, ((HttpRequestException)ex.InnerException).StatusCode);
     }
 
     public TestContext TestContext { get; set; }

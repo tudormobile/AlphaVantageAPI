@@ -2,7 +2,9 @@
 
 public class MockHttpMessageHandler : HttpMessageHandler
 {
-    public string JsonResponse { get; set; } = @"{
+    public Exception? AlwaysThrows { get; set; } = null;
+    public HttpResponseMessage? AlwaysResponds { get; set; } = null;
+    public string JsonResponse { get; } = @"{
                 ""Global Quote"": {
                     ""01. symbol"": ""IBM"",
                     ""02. open"": ""125.0000"",
@@ -20,7 +22,15 @@ public class MockHttpMessageHandler : HttpMessageHandler
     {
         return await Task.Run(() =>
         {
-            if (request.RequestUri.Query.Contains("ABCDEFG"))
+            if (AlwaysThrows != null)
+            {
+                throw AlwaysThrows;
+            }
+            if (AlwaysResponds != null)
+            {
+                return AlwaysResponds;
+            }
+            if (request!.RequestUri!.Query.Contains("ABCDEFG"))
             {
                 var json = @"{
             ""Information"": ""The **demo** API key is for demo purposes only. Please claim your free API key at (https://www.alphavantage.co/support/#api-key) to explore our full API offerings. It takes fewer than 20 seconds.""

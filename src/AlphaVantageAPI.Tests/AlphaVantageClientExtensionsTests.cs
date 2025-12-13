@@ -21,7 +21,7 @@ public class AlphaVantageClientExtensionsTests
     [ClassCleanup]
     public static void ClassCleanup()
     {
-        _httpClient?.Dispose();
+        _httpClient!.Dispose();
     }
 
     [TestMethod]
@@ -143,6 +143,62 @@ public class AlphaVantageClientExtensionsTests
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
         var actual = await client.GetGlobalQuotesAsync(["IBM", "APPL", "MSFT"], TestContext.CancellationToken);
         Assert.HasCount(3, actual);
+    }
+
+    [TestMethod]
+    public async Task GetDailyTimeSeriesAsyncTest()
+    {
+        var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
+        var actual = await client.GetDailyTimeSeriesAsync("IBM", TestContext.CancellationToken);
+        Assert.IsTrue(actual.IsSuccess);
+        Assert.AreEqual("IBM", actual.Result!.Symbol);
+    }
+
+    [TestMethod]
+    public async Task GetWeeklyTimeSeriesAsyncTest()
+    {
+        var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
+        var actual = await client.GetWeeklyTimeSeriesAsync("IBM", cancellationToken: TestContext.CancellationToken);
+        Assert.IsFalse(actual.IsSuccess);
+        Assert.AreEqual("Time series data not found.", actual.ErrorMessage);
+    }
+
+    [TestMethod]
+    public async Task GetMonthlyTimeSeriesAsyncTest()
+    {
+        var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
+        var actual = await client.GetMonthlyTimeSeriesAsync("IBM", cancellationToken: TestContext.CancellationToken);
+        Assert.IsTrue(actual.IsSuccess);
+        Assert.AreEqual("IBM", actual.Result!.Symbol);
+    }
+
+
+    [TestMethod]
+    public async Task GetWeeklyTimeSeriesAdjustedAsyncTest()
+    {
+        var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
+        var actual = await client.GetWeeklyTimeSeriesAsync("IBM", adjusted: true, TestContext.CancellationToken);
+        Assert.IsFalse(actual.IsSuccess);
+        Assert.AreEqual("Time series data not found.", actual.ErrorMessage);
+    }
+
+    [TestMethod]
+    public async Task GetMonthlyTimeSeriesAdjustedAsyncTest()
+    {
+        var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
+        var actual = await client.GetMonthlyTimeSeriesAsync("IBM", adjusted: true, TestContext.CancellationToken);
+        Assert.IsTrue(actual.IsSuccess);
+        Assert.AreEqual("IBM", actual.Result!.Symbol);
+    }
+
+    [TestMethod]
+    public async Task SymbolSearchAsyncTest()
+    {
+        var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
+        var actual = await client.SymbolSearchAsync("IBM", Tudormobile.AlphaVantage.Entities.SymbolMatch.MatchTypes.Any, Tudormobile.AlphaVantage.Entities.SymbolMatch.Regions.Any, TestContext.CancellationToken);
+        Assert.IsTrue(actual.IsSuccess);
+        Assert.AreEqual("IBM", actual.Result!.Keywords);
+        Assert.IsEmpty(actual.Result!.Matches);
     }
 
     public TestContext TestContext { get; set; }
