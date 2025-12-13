@@ -233,9 +233,5 @@ public class AlphaVantageClientTests
         Assert.AreEqual(System.Net.HttpStatusCode.InternalServerError, ((HttpRequestException)ex.InnerException).StatusCode);
     }
 
-
-
-
-
     public TestContext TestContext { get; set; }
 }
