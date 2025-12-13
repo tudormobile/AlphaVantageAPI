@@ -155,7 +155,7 @@ public class AlphaVantageClientExtensionsTests
     }
 
     [TestMethod]
-    public async Task GetWeeklyTimeSeriesAsync()
+    public async Task GetWeeklyTimeSeriesAsyncTest()
     {
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
         var actual = await client.GetWeeklyTimeSeriesAsync("IBM", cancellationToken: TestContext.CancellationToken);
@@ -164,7 +164,7 @@ public class AlphaVantageClientExtensionsTests
     }
 
     [TestMethod]
-    public async Task GetMonthlyTimeSeriesAsync()
+    public async Task GetMonthlyTimeSeriesAsyncTest()
     {
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
         var actual = await client.GetMonthlyTimeSeriesAsync("IBM", cancellationToken: TestContext.CancellationToken);
@@ -174,7 +174,7 @@ public class AlphaVantageClientExtensionsTests
 
 
     [TestMethod]
-    public async Task GetWeeklyTimeSeriesAdjustedAsync()
+    public async Task GetWeeklyTimeSeriesAdjustedAsyncTest()
     {
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
         var actual = await client.GetWeeklyTimeSeriesAsync("IBM", adjusted: true, TestContext.CancellationToken);
@@ -183,7 +183,7 @@ public class AlphaVantageClientExtensionsTests
     }
 
     [TestMethod]
-    public async Task GetMonthlyTimeSeriesAdjustedAsync()
+    public async Task GetMonthlyTimeSeriesAdjustedAsyncTest()
     {
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
         var actual = await client.GetMonthlyTimeSeriesAsync("IBM", adjusted: true, TestContext.CancellationToken);
@@ -192,7 +192,7 @@ public class AlphaVantageClientExtensionsTests
     }
 
     [TestMethod]
-    public async Task SymbolSearchAsync()
+    public async Task SymbolSearchAsyncTest()
     {
         var client = AlphaVantageClient.GetBuilder().WithApiKey("demo").WithHttpClient(_httpClient!).Build();
         var actual = await client.SymbolSearchAsync("IBM", Tudormobile.AlphaVantage.Entities.SymbolMatch.MatchTypes.Any, Tudormobile.AlphaVantage.Entities.SymbolMatch.Regions.Any, TestContext.CancellationToken);
