@@ -136,11 +136,7 @@ public class AlphaVantageClient : IAlphaVantageClient
         try
         {
             var stopwatch = Stopwatch.StartNew();
-            var symOrKey = string.Join("&", queryParameters.Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}"));
-            var url = $"https://www.alphavantage.co/query?function={function}&{symOrKey}&apikey={Uri.EscapeDataString(_apiKey)}";
-            var response = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
-            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            using var stream = await GetStreamAsync(function, queryParameters, cancellationToken).ConfigureAwait(false);
             var result = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
             _logger.LogInformation("Successfully fetched {Function} data with parameters in {ElapsedMs}ms", function, stopwatch.ElapsedMilliseconds);
             return result;
