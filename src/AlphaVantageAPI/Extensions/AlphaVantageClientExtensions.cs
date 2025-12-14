@@ -79,6 +79,54 @@ public static class AlphaVantageClientExtensions
             => await client.GetJsonDocumentAsync(AlphaVantageFunction.SYMBOL_SEARCH, symbol, cancellationToken);
 
         /// <summary>
+        /// Retrieves the dividend history for the specified symbol in JSON format.
+        /// </summary>
+        /// <param name="symbol">The ticker symbol of the security for which to retrieve dividend data. Cannot be null or empty.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="JsonDocument"/>
+        /// with the dividend data for the specified symbol.</returns>
+        public async Task<JsonDocument> DividendsJsonAsync(string symbol, CancellationToken cancellationToken = default)
+            => await client.GetJsonDocumentAsync(AlphaVantageFunction.DIVIDENDS, symbol, cancellationToken);
+
+        /// <summary>
+        /// Retrieves the raw earnings estimates data for the specified symbol in JSON format.
+        /// </summary>
+        /// <remarks>The returned JsonDocument contains the unprocessed response from the data provider.
+        /// Callers are responsible for parsing and disposing of the JsonDocument. This method does not perform any
+        /// validation or transformation of the JSON data.</remarks>
+        /// <param name="symbol">The ticker symbol of the security for which to retrieve earnings estimates. Cannot be null or empty.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a JsonDocument with the earnings
+        /// estimates data for the specified symbol.</returns>
+        public async Task<JsonDocument> EarningsEstimatesJsonAsync(string symbol, CancellationToken cancellationToken = default)
+            => await client.GetJsonDocumentAsync(AlphaVantageFunction.EARNINGS_ESTIMATES, symbol, cancellationToken);
+
+        /// <summary>
+        /// Retrieves the U.S. Treasury yield data for the specified symbol as a JSON document.
+        /// </summary>
+        /// <remarks>The returned JSON document contains the raw data as provided by the Alpha Vantage
+        /// API. The caller is responsible for parsing and disposing of the <see cref="JsonDocument"/>.</remarks>
+        /// <param name="interval">The interval for the Treasury yield data. Default is monthly.</param>
+        /// <param name="maturity">The maturity for the Treasury yield data. Default is 10-year.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="JsonDocument"/>
+        /// with the Treasury yield data for the specified symbol.</returns>
+        public async Task<JsonDocument> TreasuryYieldJsonAsync(
+            TreasuryYieldInterval? interval = TreasuryYieldInterval.Monthly,
+            TreasuryYieldMaturity? maturity = TreasuryYieldMaturity._10Year,
+            CancellationToken cancellationToken = default)
+        {
+            var intervalValue = interval ?? TreasuryYieldInterval.Monthly;
+            var maturityValue = maturity ?? TreasuryYieldMaturity._10Year;
+            IDictionary<string, string> queryParams = new Dictionary<string, string>
+            {
+                { "interval", intervalValue.ToString().ToLowerInvariant() },
+                { "maturity", maturityValue.ToString().Replace("_", "").ToLowerInvariant() }
+            };
+            return await client.GetJsonDocumentAsync(AlphaVantageFunction.TREASURY_YIELD, queryParams, cancellationToken);
+        }
+
+        /// <summary>
         /// Retrieves and parses the global quote data for the specified stock symbol into a strongly-typed response.
         /// </summary>
         /// <param name="symbol">The stock symbol to retrieve the global quote for.</param>
@@ -200,6 +248,64 @@ public static class AlphaVantageClientExtensions
             using var jsonDocument = await client.SymbolSearchJsonAsync(keywords, cancellationToken);
             var result = SymbolMatchesParser.FromDocument(jsonDocument, keywords, matchType, region);
             return ResponseParser.CreateResponse(result, jsonDocument, "Symbol search data not available.");
+        }
+
+        /// <summary>
+        /// Retrieves and parses the dividend history for the specified symbol into a strongly-typed response.
+        /// </summary>
+        /// <param name="symbol">The ticker symbol of the security for which to retrieve dividend data. Cannot be null or empty.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains an <see cref="AlphaVantageResponse{Dividends}"/>
+        /// with the dividend data for the specified symbol, or an error message if the data is not available.</returns>
+        public async Task<AlphaVantageResponse<Dividends>> GetDividendsAsync(string symbol, CancellationToken cancellationToken = default)
+        {
+            using var jsonDocument = await client.DividendsJsonAsync(symbol, cancellationToken);
+            var result = DividendsParser.FromDocument(jsonDocument, symbol);
+            return ResponseParser.CreateResponse(result, jsonDocument, "Dividend data not available.");
+        }
+
+        /// <summary>
+        /// Retrieves and parses the earnings estimates data for the specified symbol into a strongly-typed response.
+        /// </summary>
+        /// <remarks>This method calls the Alpha Vantage Earnings Estimates API and parses the JSON response into a strongly-typed
+        /// <see cref="EarningsEstimates"/> object. If the API returns an error or the data cannot be parsed, the response
+        /// will contain an error message in the <see cref="AlphaVantageResponse{T}.ErrorMessage"/> property.</remarks>
+        /// <param name="symbol">The ticker symbol of the security for which to retrieve earnings estimates. Cannot be null or empty.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains an <see cref="AlphaVantageResponse{EarningsEstimates}"/>
+        /// with the earnings estimates data for the specified symbol, or an error message if the data is not available.</returns>
+        public async Task<AlphaVantageResponse<EarningsEstimates>> GetEarningsEstimatesAsync(string symbol, CancellationToken cancellationToken = default)
+        {
+            using var jsonDocument = await client.EarningsEstimatesJsonAsync(symbol, cancellationToken);
+            var result = EarningsEstimatesParser.FromDocument(jsonDocument, symbol);
+            return ResponseParser.CreateResponse(result, jsonDocument, "Earnings estimates data not available.");
+        }
+
+        /// <summary>
+        /// Retrieves and parses the U.S. Treasury yield data for the specified symbol into a strongly-typed response.
+        /// </summary>
+        /// <remarks>
+        /// This method calls the Alpha Vantage Treasury Yield API and parses the JSON response into a strongly-typed
+        /// <see cref="TreasuryYield"/> object. If the API returns an error or the data cannot be parsed, the response
+        /// will contain an error message in the <see cref="AlphaVantageResponse{T}.ErrorMessage"/> property.
+        /// </remarks>
+        /// <param name="interval">The interval for the Treasury yield data. Default is monthly.</param>
+        /// <param name="maturity">The maturity for the Treasury yield data. Default is 10-year.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains an <see cref="AlphaVantageResponse{TreasuryYield}"/>
+        /// with the Treasury yield data for the specified symbol, or an error message if the data is not available.
+        /// </returns>
+        public async Task<AlphaVantageResponse<TreasuryYield>> GetTreasuryYieldAsync(
+            TreasuryYieldInterval? interval = TreasuryYieldInterval.Monthly,
+            TreasuryYieldMaturity? maturity = TreasuryYieldMaturity._10Year,
+            CancellationToken cancellationToken = default)
+        {
+            var intervalValue = interval ?? TreasuryYieldInterval.Monthly;
+            var maturityValue = maturity ?? TreasuryYieldMaturity._10Year;
+            using var jsonDocument = await client.TreasuryYieldJsonAsync(intervalValue, maturityValue, cancellationToken);
+            var result = TreasuryYieldParser.FromDocument(jsonDocument, intervalValue, maturityValue);
+            return ResponseParser.CreateResponse(result, jsonDocument, "Treasury yield data not available.");
         }
     }
 

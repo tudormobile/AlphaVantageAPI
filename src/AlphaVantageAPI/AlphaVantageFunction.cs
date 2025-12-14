@@ -48,6 +48,21 @@ public enum AlphaVantageFunction
     /// <summary>
     /// Specifies the available options for symbol search operations.
     /// </summary>
-    SYMBOL_SEARCH
+    SYMBOL_SEARCH,
+
+    /// <summary>
+    /// Historical and future (declared) dividend distributions.
+    /// </summary>
+    DIVIDENDS,
+
+    /// <summary>
+    /// Annual and quarterly EPS and revenue estimates for the company of interest, along with analyst count and revision history.
+    /// </summary>
+    EARNINGS_ESTIMATES,
+
+    /// <summary>
+    /// Represents the daily, weekly, and monthly US treasury yield of a given maturity timeline (e.g., 5 year, 30 year, etc).
+    /// </summary>
+    TREASURY_YIELD
 }
 

@@ -46,6 +46,39 @@ public class AlphaVantageClient : IAlphaVantageClient
         : this(apiKey, httpClientFactory.CreateClient(nameof(AlphaVantageClient)), logger) { }
 
     /// <summary>
+    /// Asynchronously retrieves the raw JSON response from the Alpha Vantage API for the specified function and query parameters.
+    /// </summary>
+    /// <param name="function">The Alpha Vantage function to query. Determines the type of data returned by the API.</param>
+    /// <param name="queryParameters">A dictionary of query parameters to include in the API request. Cannot be null or empty.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the JSON response as a string.</returns>
+    public async Task<string> GetJsonStringAsync(
+        AlphaVantageFunction function,
+        IDictionary<string, string> queryParameters,
+        CancellationToken cancellationToken = default)
+    {
+        if (queryParameters == null || queryParameters.Count == 0)
+        {
+            throw new ArgumentException("Query parameters cannot be null or empty.", nameof(queryParameters));
+        }
+
+        _logger.LogDebug("Requesting json data {Function} for {Query}", function, AsString(queryParameters));
+        try
+        {
+            var stopwatch = Stopwatch.StartNew();
+            using var reader = new StreamReader(await GetStreamAsync(function, queryParameters, cancellationToken).ConfigureAwait(false));
+            var result = await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+            _logger.LogInformation("Successfully fetched {Function} json data for {Symbol} in {ElapsedMs}ms", function, AsString(queryParameters), stopwatch.ElapsedMilliseconds);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching {Function} for {Query}", function, AsString(queryParameters));
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Asynchronously retrieves the raw JSON response from the Alpha Vantage API for the specified function and symbol.
     /// </summary>
     /// <param name="function">The Alpha Vantage function to query. Determines the type of data returned by the API.</param>
@@ -74,6 +107,43 @@ public class AlphaVantageClient : IAlphaVantageClient
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching {Function} for {Symbol}", function, symbol);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Asynchronously retrieves a JSON document from the Alpha Vantage API using the specified function and query
+    /// parameters.
+    /// </summary>
+    /// <remarks>The caller is responsible for disposing the returned JsonDocument. The method throws if the
+    /// HTTP request fails or if the response cannot be parsed as JSON.</remarks>
+    /// <param name="function">The Alpha Vantage function to invoke when constructing the API request.</param>
+    /// <param name="queryParameters">A dictionary containing the query parameters to include in the API request. Cannot be null or empty.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a JsonDocument with the data
+    /// returned by the Alpha Vantage API.</returns>
+    /// <exception cref="ArgumentException">Thrown if queryParameters is null or contains no entries.</exception>
+    public async Task<JsonDocument> GetJsonDocumentAsync(
+        AlphaVantageFunction function,
+        IDictionary<string, string> queryParameters,
+        CancellationToken cancellationToken = default)
+    {
+        if (queryParameters == null || queryParameters.Count == 0)
+        {
+            throw new ArgumentException("Query parameters cannot be null or empty.", nameof(queryParameters));
+        }
+        _logger.LogDebug("Requesting JsonDocument {Function} with parameters {Parameters}", function, AsString(queryParameters));
+        try
+        {
+            var stopwatch = Stopwatch.StartNew();
+            using var stream = await GetStreamAsync(function, queryParameters, cancellationToken).ConfigureAwait(false);
+            var result = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
+            _logger.LogInformation("Successfully fetched {Function} data with parameters in {ElapsedMs}ms", function, stopwatch.ElapsedMilliseconds);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching {Function} with parameters", function);
             throw;
         }
     }
@@ -114,14 +184,14 @@ public class AlphaVantageClient : IAlphaVantageClient
 
     private async Task<Stream> GetStreamAsync(
         AlphaVantageFunction function,
-        string symbolOrKeywords,
+        IEnumerable<KeyValuePair<string, string>> queryParameters,
         CancellationToken cancellationToken = default)
     {
-        var symOrKey = function == AlphaVantageFunction.SYMBOL_SEARCH
-            ? $"&keywords={Uri.EscapeDataString(symbolOrKeywords)}"
-            : $"&symbol={Uri.EscapeDataString(symbolOrKeywords)}";
-        var url = $"https://www.alphavantage.co/query?function={function}{symOrKey}&apikey={Uri.EscapeDataString(_apiKey)}";
-        var response = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
+        var uri = string.Concat(
+            $"https://www.alphavantage.co/query?function={function}&apikey={Uri.EscapeDataString(_apiKey)}&",
+            string.Join("&", queryParameters.Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}"))
+           );
+        var response = await _httpClient.GetAsync(uri, cancellationToken).ConfigureAwait(false);
         try
         {
             response.EnsureSuccessStatusCode();
@@ -129,9 +199,8 @@ public class AlphaVantageClient : IAlphaVantageClient
         }
         catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
         {
+            _logger.LogWarning("Rate limit hit for {Function} - Query Parameters: {Value}", function, AsString(queryParameters));
             response.Dispose();
-            var label = function == AlphaVantageFunction.SYMBOL_SEARCH ? "keywords" : "symbol";
-            _logger.LogWarning("Rate limit hit for {Function} - {Label}: {Value}", function, label, symbolOrKeywords);
             throw new AlphaVantageException("Rate limit exceeded", ex);
         }
         catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
@@ -141,10 +210,28 @@ public class AlphaVantageClient : IAlphaVantageClient
         }
         catch (HttpRequestException ex)
         {
+            var message = $"Failed to fetch function '{function}' for query '{AsString(queryParameters)}': {ex.Message}";
             response.Dispose();
-            var label = function == AlphaVantageFunction.SYMBOL_SEARCH ? "keywords" : "symbol";
-            throw new AlphaVantageException($"Failed to fetch function '{function}' for {label} '{symbolOrKeywords}': {ex.Message}", ex);
+            throw new AlphaVantageException(message, ex);
         }
     }
+
+    private static string AsString(IEnumerable<KeyValuePair<string, string>> queryParameters)
+    {
+        if (queryParameters == null) return "(none)";
+        return string.Join(',', queryParameters.Select(kv => $"{kv.Key}={kv.Value}"));
+    }
+
+    private async Task<Stream> GetStreamAsync(
+        AlphaVantageFunction function,
+        string symbolOrKeywords,
+        CancellationToken cancellationToken = default)
+    {
+        KeyValuePair<string, string> symOrKey = function == AlphaVantageFunction.SYMBOL_SEARCH
+            ? new("keywords", Uri.EscapeDataString(symbolOrKeywords))
+            : new("symbol", Uri.EscapeDataString(symbolOrKeywords));
+        return await GetStreamAsync(function, [symOrKey], cancellationToken);
+    }
+
 }
 
