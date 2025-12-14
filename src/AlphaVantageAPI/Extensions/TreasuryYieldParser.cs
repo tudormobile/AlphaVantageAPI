@@ -37,7 +37,6 @@ internal class TreasuryYieldParser : EntityParser
 
                 return new TreasuryYield
                 {
-
                     Name = name,
                     Interval = Enum.IsDefined(interval) ? interval : TreasuryYieldInterval.Monthly,
                     Maturity = Enum.IsDefined(maturity) ? maturity : TreasuryYieldMaturity._10Year,
