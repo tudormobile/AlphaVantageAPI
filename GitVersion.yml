@@ -5,6 +5,7 @@ branches:
     increment: Patch
   feature:
     increment: Minor
-major-version-bump-message: '\+semver:\s?(breaking|major)'
-minor-version-bump-message: '\+semver:\s?(feature|minor)'
-patch-version-bump-message: '\+semver:\s?(fix|patch)'
+  release:
+    regex: ^releases?[\/-](?<version>\d+\.\d+\.\d+)$
+    label: 'rc'
+    increment: None
