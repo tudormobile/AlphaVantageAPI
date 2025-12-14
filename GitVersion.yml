@@ -7,5 +7,5 @@ branches:
     increment: Minor
   release:
     regex: ^releases?[\/-](?<version>\d+\.\d+\.\d+)$
-    tag: 'rc'
+    label: 'rc'
     increment: None
