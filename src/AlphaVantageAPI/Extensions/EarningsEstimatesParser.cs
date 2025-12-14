@@ -34,7 +34,6 @@ internal class EarningsEstimatesParser : EntityParser
             var estimates = new List<EarningsEstimate>();
             foreach (var item in dataElement.EnumerateArray())
             {
-                var c = (int)GetDecimalValue(item, REVENUE_ESTIMATE_ANALYST_COUNT_PROPERTY);
                 var estimate = new EarningsEstimate
                 {
                     Date = GetDateOnlyValue(item, DATE_PROPERTY),
