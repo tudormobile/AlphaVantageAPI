@@ -5,7 +5,7 @@ branches:
     increment: Patch
   feature:
     increment: Minor
-release:
+  release:
     regex: ^releases?[\/-](?<version>\d+\.\d+\.\d+)$
     tag: 'rc'
     increment: None
