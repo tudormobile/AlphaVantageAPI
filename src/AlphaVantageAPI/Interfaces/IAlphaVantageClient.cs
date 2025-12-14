@@ -22,6 +22,16 @@ public interface IAlphaVantageClient
     Task<string> GetJsonStringAsync(AlphaVantageFunction function, string symbol, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Asynchronously retrieves the raw JSON response for the specified Alpha Vantage function and query parameters.
+    /// </summary>
+    /// <param name="function">The Alpha Vantage API function to query. Determines the type of financial data returned.</param>
+    /// <param name="queryParameters">A dictionary of query parameters to include in the API request. Keys and values must be valid Alpha Vantage parameters.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the raw JSON string returned by the
+    /// Alpha Vantage API.</returns>
+    Task<string> GetJsonStringAsync(AlphaVantageFunction function, IDictionary<string, string> queryParameters, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Asynchronously retrieves a JSON document containing data from the Alpha Vantage API for the specified function
     /// and symbol.
     /// </summary>
@@ -32,4 +42,15 @@ public interface IAlphaVantageClient
     /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="JsonDocument"/> with
     /// the requested data from Alpha Vantage.</returns>
     Task<JsonDocument> GetJsonDocumentAsync(AlphaVantageFunction function, string symbol, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Asynchronously retrieves a JSON document containing data from the Alpha Vantage API for the specified function
+    /// and query parameters.
+    /// </summary>
+    /// <param name="function">The Alpha Vantage function to query, which determines the type of financial data to retrieve.</param>
+    /// <param name="queryParameters">A dictionary of query parameters to include in the API request. Keys and values must be valid Alpha Vantage parameters.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="JsonDocument"/> with
+    /// the requested data from Alpha Vantage.</returns>
+    Task<JsonDocument> GetJsonDocumentAsync(AlphaVantageFunction function, IDictionary<string, string> queryParameters, CancellationToken cancellationToken = default);
 }

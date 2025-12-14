@@ -19,6 +19,12 @@ internal class EntityParser
     internal static long GetLongValue(JsonElement element, string propertyName, long defaultValue = 0L)
         => GetPropertyValue(element, propertyName, ParseLong, defaultValue);
 
+    internal static int GetIntValue(JsonElement element, string propertyName, int defaultValue = 0)
+        => GetPropertyValue(element, propertyName, ParseInt, defaultValue);
+
+    internal static int? GetNullableIntValue(JsonElement element, string propertyName)
+        => GetPropertyValue(element, propertyName, ParseNullableInt, default(int?));
+
     internal static string GetStringValue(JsonElement element, string propertyName, string defaultValue = "")
         => GetPropertyValue(element, propertyName, ParseString, defaultValue);
 
@@ -40,6 +46,7 @@ internal class EntityParser
 
     internal static string ParseString(JsonElement element, string defaultValue)
         => element.GetString() ?? defaultValue;
+
     internal static decimal ParseDecimal(JsonElement element, decimal defaultValue)
         => decimal.TryParse(element.GetString(), out var result) ? result : defaultValue;
 
@@ -51,6 +58,16 @@ internal class EntityParser
 
     internal static long ParseLong(JsonElement element, long defaultValue)
         => long.TryParse(element.GetString(), out var result) ? result : defaultValue;
+
+    internal static int ParseInt(JsonElement element, int defaultValue)
+    => int.TryParse(element.GetString(), out var result) ? result : defaultValue;
+
+    internal static int? ParseNullableInt(JsonElement element, int? defaultValue)
+    {
+        if (element.ValueKind == JsonValueKind.Null) return null;
+        _ = decimal.TryParse(element.GetString(), out var result);
+        return (int)result;
+    }
 
     internal static TimeOnly ParseTimeOnly(JsonElement element, TimeOnly defaultValue)
         => TimeOnly.TryParse(element.GetString(), out var result) ? result : defaultValue;
