@@ -60,7 +60,7 @@ internal class EntityParser
         => long.TryParse(element.GetString(), out var result) ? result : defaultValue;
 
     internal static int ParseInt(JsonElement element, int defaultValue)
-    => int.TryParse(element.GetString(), out var result) ? result : defaultValue;
+        => int.TryParse(element.GetString(), out var result) ? result : defaultValue;
 
     internal static int? ParseNullableInt(JsonElement element, int? defaultValue)
     {
