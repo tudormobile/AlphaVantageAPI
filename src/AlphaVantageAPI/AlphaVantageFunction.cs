@@ -64,6 +64,5 @@ public enum AlphaVantageFunction
     /// Represents the daily, weekly, and monthly US treasury yield of a given maturity timeline (e.g., 5 year, 30 year, etc).
     /// </summary>
     TREASURY_YIELD
-
 }
 
